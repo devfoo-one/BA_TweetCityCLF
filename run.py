@@ -3,13 +3,13 @@ import pickle
 from Dataset import Dataset
 
 """read from json"""
-# dataset = Dataset(dataset='../data/Germany.json')
-# with open('dataset.pickle', 'wb') as f:
-#     pickle.dump(dataset, f)
+dataset = Dataset(dataset='../data/Germany.json')
+with open('dataset.pickle', 'wb') as f:
+    pickle.dump(dataset, f)
 
 # """load persistent dataset"""
-with open('dataset.pickle', 'rb') as f:
-    dataset = pickle.load(f)
+# with open('dataset.pickle', 'rb') as f:
+#     dataset = pickle.load(f)
 
 
 train_data = [x['text'] for x in dataset.data[:1000]]
