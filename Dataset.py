@@ -2,7 +2,7 @@
 Reads the Germany.json dataset and filters for "lang"=="de" and "place.type" == "city"
 """
 
-import json, pickle
+import json
 
 
 def extractPlace(jsonObj):
@@ -65,4 +65,4 @@ class Dataset:
     """Returns the names for one target id"""
 
     def getTargetName(self, targetID):
-        return self.__target_names__[targetID]
+        return list(self.__target_names__[targetID])
