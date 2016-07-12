@@ -36,16 +36,18 @@ def cleanTweetObj(tweet):
         'timestamp_ms': tweet['timestamp_ms'],
         'user': {
             'name': tweet['user']['name']
-        }
+        },
+        'entities': tweet['entities']
     }
 
 
 class Dataset:
     def __init__(self, dataset):
-        self.__target_names__ = {}
-        self.__target_counter__ = {}
-        self.data = []
-        self.targets = []
+        self.__data_count__ = 0
+        self.__target_names__ = {}  # k: target id, v: {name: count of name string}
+        self.__target_counter__ = {}  # k: target id, v: count
+        self.__data__ = []
+        self.__targets__ = []
         for line in open(dataset):
             try:
                 jsonObj = json.loads(line)
@@ -56,13 +58,45 @@ class Dataset:
                             jsonObj['place']['place_type'] == 'city'):
                     place_id, place = extractPlace(jsonObj)
                     incrementCounterDict(place_id, self.__target_counter__)  # increment place counter
-                    add2ListDict(place_id, place['name'], self.__target_names__)
-                    self.data.append(cleanTweetObj(jsonObj))
-                    self.targets.append(place_id)
+                    self.__addTargetName__(place_id, place['name'])
+                    self.__data__.append(cleanTweetObj(jsonObj))
+                    self.__targets__.append(place_id)
+                    self.__data_count__ += 1
             except KeyError:
                 continue  # Tweet has no lang or place.placetype. skipping.
 
-    """Returns the names for one target id"""
+        """Cut last 10% of targets and point it to class 'other'"""
+        self.__target_names__['other'] = ['other']
+        sorted_targets = sorted(self.__target_counter__.items(), key=lambda x: x[1], reverse=True)
+        tempCounter = 0
+        other_count = 0
+        other_ids = []
+        for target in sorted_targets:
+            target_id = target[0]
+            target_count = target[1]
+            tempCounter += target_count
+            if tempCounter / self.__data_count__ >= 0.9:
+                other_count += target_count
+                other_ids.append(target_id)
+                self.__target_counter__.pop(target_id)
+                self.__target_names__.pop(target_id)
+        self.__target_counter__['other'] = other_count
+        for t in enumerate(self.__targets__):
+            if t[1] in other_ids:
+                self.__targets__[t[0]] = 'other'
 
-    def getTargetName(self, targetID):
-        return list(self.__target_names__[targetID])
+    def __addTargetName__(self, key, name):
+        """Adds a target name to the target name collection"""
+        if key not in self.__target_names__.keys():
+            self.__target_names__[key] = {}
+        if name not in self.__target_names__[key].keys():
+            self.__target_names__[key][name] = 0
+        self.__target_names__[key][name] += 1
+
+    def getTargetName(self, target_id):
+        """Returns the top name for one target id"""
+        return sorted(self.__target_names__[target_id], key=lambda x: x[1], reverse=True)[0]
+
+    def getData(self):
+        """Returns a tuple of (data, target)"""
+        return self.__data__, self.__targets__

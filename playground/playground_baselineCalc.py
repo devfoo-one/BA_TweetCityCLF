@@ -5,7 +5,7 @@ import numpy as np
 """load persistent dataset"""
 with open('../dataset.pickle', 'rb') as f:
     dataset = pickle.load(f)
-sortedTargets = sorted(dataset.__target_counter__.items(), key=lambda x: x[1], reverse=True)
+sortedTargets = sorted(dataset.__target_counter.items(), key=lambda x: x[1], reverse=True)
 count_top = sortedTargets[0][1]
 count_total = 0
 for target, count in sortedTargets:
