@@ -1,6 +1,7 @@
 import re
 
-class Tokenizer:
+
+class Processor:
     __remove_urls = False
     __remove_user_mentions = False
     __preserve_case = True
@@ -15,7 +16,7 @@ class Tokenizer:
         self.__remove_hashtags = remove_hashtags
         self.__blind_urls = blind_urls
 
-    def tokenize(self, tweet):
+    def digest(self, tweet):
         tweet_text = tweet['text']
 
         """remove URLs"""
@@ -52,11 +53,8 @@ class Tokenizer:
             for hashtag in tweet['entities']['hashtags']:
                 tweet_text = tweet_text.replace('#' + hashtag['text'], '')
 
-        """tokenization, only whitespace for now..."""
-        word_re = re.compile(r'[\s]+')
-        tokens = word_re.split(tweet_text)
-
         if not self.__preserve_case:
-            tokens = map(lambda x: str(x).lower(), tokens)
+            tweet_text = tweet_text.lower()
 
-        return tokens
+        return tweet_text
+

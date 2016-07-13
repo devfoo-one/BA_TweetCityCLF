@@ -68,19 +68,19 @@ class Dataset:
         """Cut last 10% of targets and point it to class 'other'"""
         self.__target_names__['other'] = ['other']
         sorted_targets = sorted(self.__target_counter__.items(), key=lambda x: x[1], reverse=True)
-        tempCounter = 0
-        other_count = 0
+        percentage_counter = 0
+        class_other_n = 0
         other_ids = []
         for target in sorted_targets:
             target_id = target[0]
             target_count = target[1]
-            tempCounter += target_count
-            if tempCounter / self.__data_count__ >= 0.9:
-                other_count += target_count
+            percentage_counter += target_count
+            if percentage_counter / self.__data_count__ >= 0.9:
+                class_other_n += target_count
                 other_ids.append(target_id)
                 self.__target_counter__.pop(target_id)
                 self.__target_names__.pop(target_id)
-        self.__target_counter__['other'] = other_count
+        self.__target_counter__['other'] = class_other_n
         for t in enumerate(self.__targets__):
             if t[1] in other_ids:
                 self.__targets__[t[0]] = 'other'
@@ -97,6 +97,9 @@ class Dataset:
         """Returns the top name for one target id"""
         return sorted(self.__target_names__[target_id], key=lambda x: x[1], reverse=True)[0]
 
-    def getData(self):
+    def getData(self, n=None):
         """Returns a tuple of (data, target)"""
-        return self.__data__, self.__targets__
+        if n is None:
+            return self.__data__, self.__targets__
+        else:
+            return self.__data__[:n], self.__targets__[:n]
