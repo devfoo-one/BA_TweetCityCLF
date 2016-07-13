@@ -97,9 +97,9 @@ class Dataset:
         """Returns the top name for one target id"""
         return sorted(self.__target_names__[target_id], key=lambda x: x[1], reverse=True)[0]
 
-    def getData(self, n=None):
+    def getData(self, offset=0, n=None):
         """Returns a tuple of (data, target)"""
         if n is None:
-            return self.__data__, self.__targets__
+            return self.__data__[offset:], self.__targets__[offset:]
         else:
-            return self.__data__[:n], self.__targets__[:n]
+            return self.__data__[:offset + n], self.__targets__[:offset + n]

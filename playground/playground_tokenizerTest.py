@@ -2,6 +2,8 @@ import pickle
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfVectorizer
 
+
+
 """load persistent dataset"""
 with open('../dataset.pickle', 'rb') as f:
     dataset = pickle.load(f)

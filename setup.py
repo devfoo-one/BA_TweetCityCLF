@@ -9,5 +9,5 @@ setup(
     author='Tom Oberhauser',
     author_email='tom@devfoo.de',
     description='Codebase for my bachelor thesis',
-    requires=['sklearn', 'geojson', 'Utils']
+    requires=['sklearn', 'geojson', 'numpy']
 )
