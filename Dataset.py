@@ -42,7 +42,12 @@ def cleanTweetObj(tweet):
 
 
 class Dataset:
-    def __init__(self, dataset):
+    def __init__(self, dataset, cut_long_tail=False):
+        """
+        Reads json file with one tweet per line
+        :param dataset: Path to data file
+        :param cut_long_tail: If True, long-tail target classes will be merged to class 'other'
+        """
         self.__data_count__ = 0
         self.__target_names__ = {}  # k: target id, v: {name: count of name string}
         self.__target_counter__ = {}  # k: target id, v: count
@@ -65,25 +70,26 @@ class Dataset:
             except KeyError:
                 continue  # Tweet has no lang or place.placetype. skipping.
 
-        """Cut last 10% of targets and point it to class 'other'"""
-        self.__target_names__['other'] = ['other']
-        sorted_targets = sorted(self.__target_counter__.items(), key=lambda x: x[1], reverse=True)
-        percentage_counter = 0
-        class_other_n = 0
-        other_ids = []
-        for target in sorted_targets:
-            target_id = target[0]
-            target_count = target[1]
-            percentage_counter += target_count
-            if percentage_counter / self.__data_count__ >= 0.9:
-                class_other_n += target_count
-                other_ids.append(target_id)
-                self.__target_counter__.pop(target_id)
-                self.__target_names__.pop(target_id)
-        self.__target_counter__['other'] = class_other_n
-        for t in enumerate(self.__targets__):
-            if t[1] in other_ids:
-                self.__targets__[t[0]] = 'other'
+        if cut_long_tail:
+            """Cut last 10% of targets and point it to class 'other'"""
+            self.__target_names__['other'] = ['other']
+            sorted_targets = sorted(self.__target_counter__.items(), key=lambda x: x[1], reverse=True)
+            percentage_counter = 0
+            class_other_n = 0
+            other_ids = []
+            for target in sorted_targets:
+                target_id = target[0]
+                target_count = target[1]
+                percentage_counter += target_count
+                if percentage_counter / self.__data_count__ >= 0.9:
+                    class_other_n += target_count
+                    other_ids.append(target_id)
+                    self.__target_counter__.pop(target_id)
+                    self.__target_names__.pop(target_id)
+            self.__target_counter__['other'] = class_other_n
+            for t in enumerate(self.__targets__):
+                if t[1] in other_ids:
+                    self.__targets__[t[0]] = 'other'
 
     def __addTargetName__(self, key, name):
         """Adds a target name to the target name collection"""
