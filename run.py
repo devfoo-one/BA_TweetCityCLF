@@ -1,37 +1,46 @@
 import sys
-
 from Dataset import Dataset
 from Utils import tweet_preprocessor as tp
-
-dataset_path = sys.argv[1]
-
-"""read from json"""
-dataset = Dataset(dataset=dataset_path)
-
-t1 = tp.Processor(blind_urls=False, remove_urls=False, remove_user_mentions=False, remove_hashtags=False,
-                  transform_lowercase=False)
-
-raw_train_data, train_targets = dataset.getData(n=900)
-train_data = [t1.digest(tweet) for tweet in raw_train_data]
-raw_test_data, test_targets = dataset.getData(offset=900, n=100)
-test_data = [t1.digest(tweet) for tweet in raw_test_data]
-
+from Utils import tweet_tokenizer
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.pipeline import Pipeline
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
-
-baseline = Pipeline([('vect', CountVectorizer()),
-                     ('clf', MultinomialNB()),
-                     ])
-baseline.fit(train_data, train_targets)
-predicted = baseline.predict(test_data)
-for tweet, target, predict in zip(train_data, train_targets, predicted):
-    print(dataset.getTargetName(target), dataset.getTargetName(predict))
-
 import numpy as np
 
-print(np.mean(predicted == test_targets))
+dataset_path = sys.argv[1]
+
+"""read from json"""
+dataset = Dataset(dataset=dataset_path, cut_long_tail=True)
+tok = tweet_tokenizer.Tokenizer()
+
+"""---------- e1: BOW BASELINE ----------"""
+e1_preprocessor = tp.Processor(blind_urls=False, remove_urls=False, remove_user_mentions=False, remove_hashtags=True,
+                               transform_lowercase=False)
+raw_train_data_e1, train_targets_e1 = dataset.getData(n=20)
+raw_test_data_e1, test_targets_e1 = dataset.getData(offset=900, n=100)
+test_data_e1 = [e1_preprocessor.digest(tweet) for tweet in raw_test_data_e1]
+cv_e1 = CountVectorizer(preprocessor=e1_preprocessor, tokenizer=tok, lowercase=False, binary=True)
+tdm_e1 = cv_e1.fit_transform(raw_train_data_e1)  # create term-document matrix
+
+for i, tweet in enumerate(raw_train_data_e1):
+    print('"', tweet['text'], '" got transformed into...', sep='')
+    for featureID, count in enumerate(
+            tdm_e1.getrow(i).toarray()[0]):  # .toarray()[0] to transform sparse matrix into list
+        if count != 0:
+            print(cv_e1.get_feature_names()[featureID], '(', count, '), ', sep='', end='')
+    print('\n-----')
+
+# clf_e1 = Pipeline([('vect', CountVectorizer()),
+#                    ('clf', MultinomialNB()),
+#                    ])
+# clf_e1.fit(train_data_e1, train_targets_e1)
+# predicted = clf_e1.predict(test_data_e1)
+"""---------- e1: END ----------"""
+
+# for tweet, target, predict in zip(train_data_e1, train_targets_e1, predicted):
+#     print(dataset.getTargetName(target), dataset.getTargetName(predict))
+# print(np.mean(predicted == test_targets_e1))
 
 # train_data = [x['text'] for x in dataset.data[:1000]]
 # train_targets = dataset.targets[:1000]
