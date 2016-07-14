@@ -17,6 +17,7 @@ class Processor:
         self.__blind_urls__ = blind_urls
 
     def digest(self, tweet):
+        """Processes a tweet object (as given from the streaming api) and returns a string."""
         tweet_text = tweet['text']
 
         """remove URLs"""
@@ -58,3 +59,5 @@ class Processor:
 
         return tweet_text
 
+    def __call__(self, tweet):
+        return self.digest(tweet)
