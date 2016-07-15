@@ -13,17 +13,17 @@ dataset_path = sys.argv[1]
 """read from json"""
 dataset = Dataset(dataset=dataset_path, cut_long_tail=True)
 tok = tweet_tokenizer.Tokenizer()
+raw_train_data, train_targets = dataset.getData(n=len(dataset) / 0.9)
 
 """---------- e1: BOW BASELINE ----------"""
 e1_preprocessor = tp.Processor(blind_urls=False, remove_urls=False, remove_user_mentions=False, remove_hashtags=True,
                                transform_lowercase=False)
-raw_train_data_e1, train_targets_e1 = dataset.getData(n=20)
-raw_test_data_e1, test_targets_e1 = dataset.getData(offset=900, n=100)
+raw_test_data_e1, test_targets_e1 = dataset.getData(offset=len(dataset) / 0.9, n=len(dataset) / 0.1)
 test_data_e1 = [e1_preprocessor.digest(tweet) for tweet in raw_test_data_e1]
 cv_e1 = CountVectorizer(preprocessor=e1_preprocessor, tokenizer=tok, lowercase=False, binary=True)
-tdm_e1 = cv_e1.fit_transform(raw_train_data_e1)  # create term-document matrix
+tdm_e1 = cv_e1.fit_transform(raw_train_data)  # create term-document matrix
 
-for i, tweet in enumerate(raw_train_data_e1):
+for i, tweet in enumerate(raw_train_data):
     print('"', tweet['text'], '" got transformed into...', sep='')
     for featureID, count in enumerate(
             tdm_e1.getrow(i).toarray()[0]):  # .toarray()[0] to transform sparse matrix into list

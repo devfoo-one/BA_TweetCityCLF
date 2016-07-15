@@ -105,7 +105,12 @@ class Dataset:
 
     def getData(self, offset=0, n=None):
         """Returns a tuple of (data, target)"""
+        offset = int(offset)
         if n is None:
             return self.__data__[offset:], self.__targets__[offset:]
         else:
+            n = int(n)
             return self.__data__[:offset + n], self.__targets__[:offset + n]
+
+    def __len__(self):
+        return self.__data_count__
