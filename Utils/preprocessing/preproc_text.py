@@ -2,28 +2,30 @@ import re
 
 
 class TextProcessor:
-    __remove_urls__ = False
-    __remove_user_mentions__ = False
-    __transform_lowercase__ = True
-    __remove_hashtags__ = False
-    __blind_urls__ = False
-    __expand_urls__ = True
+    config = {
+        'remove_urls': False,
+        'remove_user_mentions': False,
+        'transform_lowercase': True,
+        'remove_hashtags': False,
+        'blind_urls': False,
+        'expand_urls': True
+    }
 
     def __init__(self, blind_urls=False, remove_urls=False, remove_user_mentions=False, remove_hashtags=False,
                  transform_lowercase=True, expand_urls=True):
-        self.__remove_urls__ = remove_urls
-        self.__remove_user_mentions__ = remove_user_mentions
-        self.__transform_lowercase__ = transform_lowercase
-        self.__remove_hashtags__ = remove_hashtags
-        self.__blind_urls__ = blind_urls
-        self.__expand_urls__ = expand_urls
+        self.config['remove_urls'] = remove_urls
+        self.config['remove_user_mentions'] = remove_user_mentions
+        self.config['transform_lowercase'] = transform_lowercase
+        self.config['remove_hashtags'] = remove_hashtags
+        self.config['blind_urls'] = blind_urls
+        self.config['expand_urls'] = expand_urls
 
     def digest(self, tweet):
         """Processes a tweet object (as given from the streaming api) and returns a string."""
         tweet_text = tweet['text']
 
         """remove URLs"""
-        if self.__remove_urls__:
+        if self.config['remove_urls']:
             # collect all url strings (ugly but works)
             urls = []
             for url in tweet['entities']['urls']:
@@ -37,7 +39,7 @@ class TextProcessor:
                 tweet_text = tweet_text.replace(url, '')
 
         """blind URLs"""
-        if self.__blind_urls__:
+        if self.config['blind_urls']:
             for url in tweet['entities']['urls']:
                 tweet_text = tweet_text.replace(url['url'], '[URL]')
             try:
@@ -47,21 +49,21 @@ class TextProcessor:
                 pass
 
         """remove user mentions"""
-        if self.__remove_user_mentions__:
+        if self.config['remove_user_mentions']:
             for mention in tweet['entities']['user_mentions']:
                 tweet_text = tweet_text.replace('@' + mention['screen_name'], '')
 
         """remove hashtags"""
-        if self.__remove_hashtags__:
+        if self.config['remove_hashtags']:
             for hashtag in tweet['entities']['hashtags']:
                 tweet_text = tweet_text.replace('#' + hashtag['text'], '')
 
         """transform to lowercase"""
-        if self.__transform_lowercase__:
+        if self.config['transform_lowercase']:
             tweet_text = tweet_text.lower()
 
         """expand urls"""
-        if self.__expand_urls__:
+        if self.config['expand_urls']:
             urls = []
             for url in tweet['entities']['urls']:
                 urls.append((url['url'], url['expanded_url']))
@@ -77,3 +79,6 @@ class TextProcessor:
 
     def __call__(self, tweet):
         return self.digest(tweet)
+
+    def __str__(self):
+        return ', '.join([attr + '=' + str(val) for attr, val in self.config.items()])
