@@ -1,7 +1,7 @@
 import re
 
 
-class Processor:
+class TextProcessor:
     __remove_urls__ = False
     __remove_user_mentions__ = False
     __transform_lowercase__ = True

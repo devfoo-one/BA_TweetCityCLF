@@ -1,12 +1,10 @@
 import sys
-from Dataset import Dataset
-from Utils import tweet_preprocessor as tp
-from Utils import tweet_tokenizer
-from sklearn.naive_bayes import MultinomialNB
-from sklearn.pipeline import Pipeline
+
 from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.feature_extraction.text import TfidfTransformer
-import numpy as np
+
+from Dataset import Dataset
+from Utils.preprocessing import preproc_text as tp
+from Utils.tokenization import tweet_tokenizer
 
 dataset_path = sys.argv[1]
 
@@ -16,11 +14,11 @@ tok = tweet_tokenizer.Tokenizer()
 raw_train_data, train_targets = dataset.getData(n=len(dataset) / 0.9)
 
 """---------- e1: BOW BASELINE ----------"""
-e1_preprocessor = tp.Processor(blind_urls=False, remove_urls=False, remove_user_mentions=False, remove_hashtags=True,
-                               transform_lowercase=False)
+e1_preproc_text = tp.TextProcessor(blind_urls=False, remove_urls=False, remove_user_mentions=False, remove_hashtags=True,
+                                   transform_lowercase=False)
 raw_test_data_e1, test_targets_e1 = dataset.getData(offset=len(dataset) / 0.9, n=len(dataset) / 0.1)
-test_data_e1 = [e1_preprocessor.digest(tweet) for tweet in raw_test_data_e1]
-cv_e1 = CountVectorizer(preprocessor=e1_preprocessor, tokenizer=tok, lowercase=False, binary=True)
+test_data_e1 = [e1_preproc_text.digest(tweet) for tweet in raw_test_data_e1]
+cv_e1 = CountVectorizer(preprocessor=e1_preproc_text, tokenizer=tok, lowercase=False, binary=True)
 tdm_e1 = cv_e1.fit_transform(raw_train_data)  # create term-document matrix
 
 for i, tweet in enumerate(raw_train_data):
