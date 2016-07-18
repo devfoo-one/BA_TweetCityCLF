@@ -9,14 +9,14 @@ from Utils.tokenization import tweet_tokenizer
 dataset_path = sys.argv[1]
 
 """read from json"""
-dataset = Dataset(dataset=dataset_path, cut_long_tail=True)
+dataset = Dataset(dataset=dataset_path)
 tok = tweet_tokenizer.Tokenizer()
-raw_train_data, train_targets = dataset.getData(n=len(dataset) / 0.9)
+raw_train_data, train_targets = dataset.getData(n=len(dataset) * 0.9, cut_long_tail=True)
+raw_test_data_e1, test_targets_e1 = dataset.getData(offset=len(dataset) * 0.9, n=len(dataset) * 0.1, cut_long_tail=True)
 
 """---------- e1: BOW BASELINE ----------"""
 e1_preproc_text = tp.TextProcessor(blind_urls=False, remove_urls=False, remove_user_mentions=False, remove_hashtags=True,
                                    transform_lowercase=False)
-raw_test_data_e1, test_targets_e1 = dataset.getData(offset=len(dataset) / 0.9, n=len(dataset) / 0.1)
 test_data_e1 = [e1_preproc_text.digest(tweet) for tweet in raw_test_data_e1]
 cv_e1 = CountVectorizer(preprocessor=e1_preproc_text, tokenizer=tok, lowercase=False, binary=True)
 tdm_e1 = cv_e1.fit_transform(raw_train_data)  # create term-document matrix

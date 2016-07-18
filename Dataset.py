@@ -42,7 +42,7 @@ def cleanTweetObj(tweet):
 
 
 class Dataset:
-    def __init__(self, dataset, cut_long_tail=False):
+    def __init__(self, dataset):
         """
         Reads json file with one tweet per line
         :param dataset: Path to data file
@@ -50,9 +50,12 @@ class Dataset:
         """
         self.__data_count__ = 0
         self.__target_names__ = {}  # k: target id, v: {name: count of name string}
+        self.__target_names_noLongTail__ = {}  # k: target id, v: {name: count of name string}
         self.__target_counter__ = {}  # k: target id, v: count
-        self.__data__ = []
-        self.__targets__ = []
+        self.__target_counter_noLongTail__ = {}  # k: target id, v: count
+        self.__data__ = []  # filtered tweet objects
+        self.__targets__ = []  # targets
+        self.__targets_noLongTail__ = []  # targets with 'other' class
         for line in open(dataset):
             try:
                 jsonObj = json.loads(line)
@@ -70,26 +73,28 @@ class Dataset:
             except KeyError:
                 continue  # Tweet has no lang or place.placetype. skipping.
 
-        if cut_long_tail:
-            """Cut last 10% of targets and point it to class 'other'"""
-            self.__target_names__['other'] = ['other']
-            sorted_targets = sorted(self.__target_counter__.items(), key=lambda x: x[1], reverse=True)
-            percentage_counter = 0
-            class_other_n = 0
-            other_ids = []
-            for target in sorted_targets:
-                target_id = target[0]
-                target_count = target[1]
-                percentage_counter += target_count
-                if percentage_counter / self.__data_count__ >= 0.9:
-                    class_other_n += target_count
-                    other_ids.append(target_id)
-                    self.__target_counter__.pop(target_id)
-                    self.__target_names__.pop(target_id)
-            self.__target_counter__['other'] = class_other_n
-            for t in enumerate(self.__targets__):
-                if t[1] in other_ids:
-                    self.__targets__[t[0]] = 'other'
+        """Cut last 10% of targets and point it to class 'other'"""
+        self.__targets_noLongTail__ = list(self.__targets__)
+        self.__target_counter_noLongTail__ = dict(self.__target_counter__)
+        self.__target_names_noLongTail__ = dict(self.__target_names__)
+        self.__target_names_noLongTail__['other'] = ['other']
+        sorted_targets = sorted(self.__target_counter__.items(), key=lambda x: x[1], reverse=True)
+        percentage_counter = 0
+        class_other_n = 0
+        other_ids = []
+        for target in sorted_targets:
+            target_id = target[0]
+            target_count = target[1]
+            percentage_counter += target_count
+            if percentage_counter / self.__data_count__ >= 0.9:
+                class_other_n += target_count
+                other_ids.append(target_id)
+                self.__target_counter_noLongTail__.pop(target_id)
+                self.__target_names_noLongTail__.pop(target_id)
+        self.__target_counter_noLongTail__['other'] = class_other_n
+        for t in enumerate(self.__targets_noLongTail__):
+            if t[1] in other_ids:
+                self.__targets_noLongTail__[t[0]] = 'other'
 
     def __addTargetName__(self, key, name):
         """Adds a target name to the target name collection"""
@@ -101,16 +106,26 @@ class Dataset:
 
     def getTargetName(self, target_id):
         """Returns the top name for one target id"""
-        return sorted(self.__target_names__[target_id], key=lambda x: x[1], reverse=True)[0]
+        if target_id == 'other':  # if someone asks for 'other' then use this dict
+            return sorted(self.__target_names_noLongTail__[target_id], key=lambda x: x[1], reverse=True)[0]
+        else:  # superset of noLongTail dict,  so no problems with general inquiries
+            return sorted(self.__target_names__[target_id], key=lambda x: x[1], reverse=True)[0]
 
-    def getData(self, offset=0, n=None):
+    def getData(self, offset=0, n=None, cut_long_tail=False):
         """Returns a tuple of (data, target)"""
         offset = int(offset)
-        if n is None:
-            return self.__data__[offset:], self.__targets__[offset:]
+        if cut_long_tail:
+            if n is None:
+                return self.__data__[offset:], self.__targets_noLongTail__[offset:]
+            else:
+                n = int(n)
+                return self.__data__[offset:offset + n], self.__targets_noLongTail__[offset:offset + n]
         else:
-            n = int(n)
-            return self.__data__[:offset + n], self.__targets__[:offset + n]
+            if n is None:
+                return self.__data__[offset:], self.__targets__[offset:]
+            else:
+                n = int(n)
+                return self.__data__[offset:offset + n], self.__targets__[offset:offset + n]
 
     def __len__(self):
         return self.__data_count__
