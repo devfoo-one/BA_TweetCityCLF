@@ -1,6 +1,3 @@
-import re
-
-
 class TextProcessor:
     config = {
         'remove_urls': False,
