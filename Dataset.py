@@ -46,16 +46,22 @@ class Dataset:
         """
         Reads json file with one tweet per line
         :param dataset: Path to data file
-        :param cut_long_tail: If True, long-tail target classes will be merged to class 'other'
         """
         self.__data_count__ = 0
-        self.__target_names__ = {}  # k: target id, v: {name: count of name string}
-        self.__target_names_noLongTail__ = {}  # k: target id, v: {name: count of name string}
+        self.__target_names_dict__ = {}  # k: target id, v: {name: count of name string}
+        self.__target_names_dict_noLongTail__ = {}  # k: target id, v: {name: count of name string}
         self.__target_counter__ = {}  # k: target id, v: count
         self.__target_counter_noLongTail__ = {}  # k: target id, v: count
+
+        """data lists"""
         self.__data__ = []  # filtered tweet objects
         self.__targets__ = []  # targets
         self.__targets_noLongTail__ = []  # targets with 'other' class
+        self.__target_names_list__ = []  # target names
+        self.__target_names_list_noLongTail__ = [] # target names with 'other' class
+
+        print('DATASET: Initialising with file', dataset)
+        print('DATASET: Reading JSON... ', end='')
         for line in open(dataset):
             try:
                 jsonObj = json.loads(line)
@@ -72,12 +78,14 @@ class Dataset:
                     self.__data_count__ += 1
             except KeyError:
                 continue  # Tweet has no lang or place.placetype. skipping.
+        print('done.')
 
+        print("DATASET: Generating 'other' class for last 10% (long tail) target classes... ", end='')
         """Cut last 10% of targets and point it to class 'other'"""
         self.__targets_noLongTail__ = list(self.__targets__)
         self.__target_counter_noLongTail__ = dict(self.__target_counter__)
-        self.__target_names_noLongTail__ = dict(self.__target_names__)
-        self.__target_names_noLongTail__['other'] = ['other']
+        self.__target_names_dict_noLongTail__ = dict(self.__target_names_dict__)
+        self.__target_names_dict_noLongTail__['other'] = ['other']
         sorted_targets = sorted(self.__target_counter__.items(), key=lambda x: x[1], reverse=True)
         percentage_counter = 0
         class_other_n = 0
@@ -90,29 +98,51 @@ class Dataset:
                 class_other_n += target_count
                 other_ids.append(target_id)
                 self.__target_counter_noLongTail__.pop(target_id)
-                self.__target_names_noLongTail__.pop(target_id)
+                self.__target_names_dict_noLongTail__.pop(target_id)
         self.__target_counter_noLongTail__['other'] = class_other_n
         for t in enumerate(self.__targets_noLongTail__):
             if t[1] in other_ids:
                 self.__targets_noLongTail__[t[0]] = 'other'
+        print('done.')
+
+        print("DATASET: Generating target name lists... ", end='')
+        for target in self.__targets__:
+            self.__target_names_list__.append(self.getTargetName(target))
+        for target in self.__targets_noLongTail__:
+            self.__target_names_list_noLongTail__.append(self.getTargetName(target))
+        print('done.')
 
     def __addTargetName__(self, key, name):
-        """Adds a target name to the target name collection"""
-        if key not in self.__target_names__.keys():
-            self.__target_names__[key] = {}
-        if name not in self.__target_names__[key].keys():
-            self.__target_names__[key][name] = 0
-        self.__target_names__[key][name] += 1
+        """
+        Adds a target name to the target name collection and increment name counter
+        :param key: target id
+        :param name: target name
+        """
+        if key not in self.__target_names_dict__.keys():
+            self.__target_names_dict__[key] = {}
+        if name not in self.__target_names_dict__[key].keys():
+            self.__target_names_dict__[key][name] = 0
+        self.__target_names_dict__[key][name] += 1
 
     def getTargetName(self, target_id):
-        """Returns the top name for one target id"""
+        """
+        Returns the top name for one target id
+        :param target_id: target id
+        :return: str, most frequent name for this target id
+        """
         if target_id == 'other':  # if someone asks for 'other' then use this dict
-            return sorted(self.__target_names_noLongTail__[target_id], key=lambda x: x[1], reverse=True)[0]
+            return sorted(self.__target_names_dict_noLongTail__[target_id], key=lambda x: x[1], reverse=True)[0]
         else:  # superset of noLongTail dict,  so no problems with general inquiries
-            return sorted(self.__target_names__[target_id], key=lambda x: x[1], reverse=True)[0]
+            return sorted(self.__target_names_dict__[target_id], key=lambda x: x[1], reverse=True)[0]
 
     def getData(self, offset=0, n=None, cut_long_tail=False):
-        """Returns a tuple of (data, target)"""
+        """
+        Returns a tuple of (data, target)
+        :param offset: data offset
+        :param n: number of data to return
+        :param cut_long_tail: use 'other' class for long tail targets
+        :return: (data, target)
+        """
         offset = int(offset)
         if cut_long_tail:
             if n is None:

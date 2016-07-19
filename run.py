@@ -1,6 +1,10 @@
 import sys
 
+import numpy as np
 from sklearn.feature_extraction.text import CountVectorizer
+from sklearn import metrics
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.pipeline import Pipeline
 
 from Dataset import Dataset
 from Utils.preprocessing import preproc_text as tp
@@ -8,36 +12,58 @@ from Utils.tokenization import tweet_tokenizer
 
 dataset_path = sys.argv[1]
 
-"""read from json"""
+""" read from json """
 dataset = Dataset(dataset=dataset_path)
+
+""" Initialise default tokenizer """
 tok = tweet_tokenizer.Tokenizer()
-raw_train_data, train_targets = dataset.getData(n=len(dataset) * 0.8, cut_long_tail=True)  # get 80% of data for training
-raw_test_data_e1, test_targets_e1 = dataset.getData(offset=len(dataset) * 0.8, n=len(dataset) * 0.1, cut_long_tail=True)  # get another 10% for testing
 
-print('---------- e1: BOW BASELINE ----------')
+"""
+    Split data into train, test and validation
+     ----------------------------------------------------------
+    |               80% TRAIN            | 10% TEST | 10% VALI |
+     ----------------------------------------------------------
+"""
+raw_train_data, train_targets = dataset.getData(n=len(dataset) * 0.8,
+                                                cut_long_tail=True)  # get 80% of data for training
+raw_test_data, test_targets = dataset.getData(offset=len(dataset) * 0.8, n=len(dataset) * 0.1,
+                                              cut_long_tail=True)  # get another 10% for testing
+test_target_names_noLongTail = dataset.__target_names_list_noLongTail__[int(len(dataset) * 0.8):int(len(dataset) * 0.9)]
 
-e1_preproc_text = tp.TextProcessor(blind_urls=False, remove_urls=False, remove_user_mentions=False, remove_hashtags=False,
+"""
+    E1 - Binary BagOfWords
+    Full text gets tokenized and transformed into a binary term-document-matrix.
+    Dataset without long tail
+"""
+print('---------- e1: BINARY BOW BASELINE BEGIN ----------')
+
+e1_preproc_text = tp.TextProcessor(blind_urls=False, remove_urls=False, remove_user_mentions=False,
+                                   remove_hashtags=False,
                                    transform_lowercase=False, expand_urls=False)
 print('** preproc config:', e1_preproc_text, '**')
+test_data_e1 = [e1_preproc_text.digest(tweet) for tweet in raw_test_data]
+print('Training classifier...', end='')
+clf_e1 = Pipeline([('vect', CountVectorizer(preprocessor=e1_preproc_text, tokenizer=tok, lowercase=False, binary=True)),
+                   ('clf', MultinomialNB()),
+                   ])
+clf_e1.fit(raw_train_data, train_targets)
+print('done.')
+print('Predicting test data...', end='')
+e1_predicted = clf_e1.predict(raw_test_data)
+print('done.')
+print('MEAN = ', np.mean(e1_predicted == test_targets))
+# print(metrics.classification_report(test_targets, predicted, target_names=test_target_names_noLongTail))
+# print('PRECISION =',
+#       metrics.precision_score(test_targets, predicted, average='macro', labels=dataset.__target_names_list_noLongTail__))
+# print('RECALL =', metrics.recall_score(test_targets, predicted, average='macro'))
+# print('F1 =', metrics.f1_score(test_targets, predicted, average='macro'))
 
-test_data_e1 = [e1_preproc_text.digest(tweet) for tweet in raw_test_data_e1]
-cv_e1 = CountVectorizer(preprocessor=e1_preproc_text, tokenizer=tok, lowercase=False, binary=True)
-tdm_e1 = cv_e1.fit_transform(raw_train_data)  # create term-document matrix
+# for targetId in dataset.__target_names_noLongTail__:
+#     print(dataset.getTargetName(targetId))
+#     print(metrics.precision_recall_fscore_support(test_targets, predicted, labels=list(targetId)))
+# print(metrics.classification_report(test_targets, predicted))
 
-for i, tweet in enumerate(raw_train_data):
-    print('"', tweet['text'], '" got transformed into...', sep='')
-    for featureID, count in enumerate(
-            tdm_e1.getrow(i).toarray()[0]):  # .toarray()[0] to transform sparse matrix into list
-        if count != 0:
-            print(cv_e1.get_feature_names()[featureID], '(', count, '), ', sep='', end='')
-    print('\n-----')
-
-# clf_e1 = Pipeline([('vect', CountVectorizer()),
-#                    ('clf', MultinomialNB()),
-#                    ])
-# clf_e1.fit(train_data_e1, train_targets_e1)
-# predicted = clf_e1.predict(test_data_e1)
-"""---------- e1: END ----------"""
+print('---------- e1: BINARY BOW BASELINE END ----------')
 
 # for tweet, target, predict in zip(train_data_e1, train_targets_e1, predicted):
 #     print(dataset.getTargetName(target), dataset.getTargetName(predict))
