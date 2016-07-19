@@ -1,4 +1,4 @@
-from distutils.core import setup
+from setuptools import setup
 
 setup(
     name='TweetCityCLF',
@@ -9,6 +9,5 @@ setup(
     author='Tom Oberhauser',
     author_email='tom@devfoo.de',
     description='Codebase for my bachelor thesis',
-    requires=['sklearn', 'geojson', 'numpy', 'scipy'],
-    install_requires=['sklearn', 'geojson', 'numpy', 'scipy']
+    requires=['sklearn', 'geojson', 'numpy', 'scipy']
 )
