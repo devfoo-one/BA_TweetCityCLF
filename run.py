@@ -42,13 +42,13 @@ e1_preproc_text = tp.TextProcessor(blind_urls=False, remove_urls=False, remove_u
                                    transform_lowercase=False, expand_urls=False)
 print('** preproc config:', e1_preproc_text, '**')
 test_data_e1 = [e1_preproc_text.digest(tweet) for tweet in raw_test_data]
-print('Training classifier...', end='')
+print('Training classifier...', end='', flush=True)
 clf_e1 = Pipeline([('vect', CountVectorizer(preprocessor=e1_preproc_text, tokenizer=tok, lowercase=False, binary=True)),
                    ('clf', MultinomialNB()),
                    ])
 clf_e1.fit(raw_train_data, train_targets)
 print('done.')
-print('Predicting test data...', end='')
+print('Predicting test data...', end='', flush=True)
 e1_predicted = clf_e1.predict(raw_test_data)
 print('done.')
 print('MEAN = ', np.mean(e1_predicted == test_targets))

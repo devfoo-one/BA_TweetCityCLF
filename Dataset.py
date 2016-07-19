@@ -61,7 +61,7 @@ class Dataset:
         self.__target_names_list_noLongTail__ = [] # target names with 'other' class
 
         print('DATASET: Initialising with file', dataset)
-        print('DATASET: Reading JSON... ', end='')
+        print('DATASET: Reading JSON... ', end='', flush=True)
         for line in open(dataset):
             try:
                 jsonObj = json.loads(line)
@@ -80,7 +80,7 @@ class Dataset:
                 continue  # Tweet has no lang or place.placetype. skipping.
         print('done.')
 
-        print("DATASET: Generating 'other' class for last 10% (long tail) target classes... ", end='')
+        print("DATASET: Generating 'other' class for last 10% (long tail) target classes... ", end='', flush=True)
         """Cut last 10% of targets and point it to class 'other'"""
         self.__targets_noLongTail__ = list(self.__targets__)
         self.__target_counter_noLongTail__ = dict(self.__target_counter__)
@@ -105,7 +105,7 @@ class Dataset:
                 self.__targets_noLongTail__[t[0]] = 'other'
         print('done.')
 
-        print("DATASET: Generating target name lists... ", end='')
+        print("DATASET: Generating target name lists... ", end='', flush=True)
         for target in self.__targets__:
             self.__target_names_list__.append(self.getTargetName(target))
         for target in self.__targets_noLongTail__:
