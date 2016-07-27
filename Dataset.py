@@ -5,32 +5,49 @@ Reads the Germany.json dataset and filters for "lang"=="de" and "place.type" == 
 import json
 
 
-def extractPlace(jsonObj):
-    """Extracts a place object out of a tweet and returns (id, place)"""
-    id = jsonObj['place']['id']
-    place = jsonObj['place']
+def extractPlace(json_obj):
+    """
+    Extracts a place object out of a tweet and returns (id, place)
+    :param json_obj: twitter place object
+    :return: (id, place)
+    """
+    id = json_obj['place']['id']
+    place = json_obj['place']
     return id, place
 
 
-def incrementCounterDict(key, dict):
-    """Checks if dict[key] is present and increment by one, if not set dict[key] = 1"""
+def incrementCounterDict(key, dictionary):
+    """
+    Checks if dictionary[key] is present and increment by one, if not set dict[key] = 1
+    :param key: dictionary key
+    :param dictionary: dictionary
+    """
     try:
-        dict[key] += 1
+        dictionary[key] += 1
     except KeyError:
-        dict[key] = 1
+        dictionary[key] = 1
 
 
-def add2ListDict(key, value, dict):
-    """Checks if dict[key] is a set and add 'value', if not create new set and add 'value'"""
+def add2ListDict(key, value, dictionary):
+    """
+    Checks if dictionary[key] is a set and add 'value', if not create new set and add 'value'
+    :param key: dictionary key
+    :param value: value to add to list
+    :param dictionary: dictionary to work with
+    """
     try:
-        dict[key].add(value)
+        dictionary[key].add(value)
     except KeyError:
-        dict[key] = set()
-        dict[key].add(value)
+        dictionary[key] = set()
+        dictionary[key].add(value)
 
 
 def cleanTweetObj(tweet):
-    """Takes a tweet object and removes unnecessary parts (to save memory)"""
+    """
+    Takes a tweet object and removes unnecessary parts (to save memory)
+    :param tweet: tweet object from streaming api
+    :return: filtered twitter object with same structure
+    """
     return {
         'text': tweet['text'],
         'timestamp_ms': tweet['timestamp_ms'],
