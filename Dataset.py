@@ -86,7 +86,7 @@ class Dataset:
                 continue  # could not decode json line, skipping.
             try:
                 if (jsonObj['lang'] == 'de') and (jsonObj['place'] is not None) and (
-                            jsonObj['place']['place_type'] == 'city'):
+                            jsonObj['place']['place_type'] == 'city' and jsonObj['place']['country_code'] == 'DE'):
                     place_id, place = extractPlace(jsonObj)
                     incrementCounterDict(place_id, self.__target_counter__)  # increment place counter
                     self.__addTargetName__(place_id, place['name'])
