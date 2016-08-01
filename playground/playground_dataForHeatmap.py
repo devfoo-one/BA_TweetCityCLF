@@ -74,7 +74,7 @@ with open('../../data/places.csv', 'w', newline='') as csvfile:
                 getTargetName(place_id),
                 place_count,
                 json.dumps(places[place_id]['bounding_box']),
-                places[place_id]['center'][0],
-                places[place_id]['center'][1]
+                str.replace(str(places[place_id]['center'][0]),'.',','),  # replace period for better number handling in external tools
+                str.replace(str(places[place_id]['center'][1]),'.',',')
             )
         )
