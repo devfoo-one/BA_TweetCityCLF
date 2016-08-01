@@ -100,7 +100,7 @@ class Dataset:
         self.__targets_noLongTail__ = list(self.__targets__)
         self.__target_counter_noLongTail__ = dict(self.__target_counter__)
         self.__target_names_dict_noLongTail__ = dict(self.__target_names_dict__)
-        self.__target_names_dict_noLongTail__['other'] = ['other']
+        self.__target_names_dict_noLongTail__['other'] = {'other': 1}
         sorted_targets = sorted(self.__target_counter__.items(), key=lambda x: x[1], reverse=True)
         percentage_counter = 0
         class_other_n = 0
@@ -139,9 +139,9 @@ class Dataset:
         :return: str, most frequent name for this target id
         """
         if target_id == 'other':  # if someone asks for 'other' then use this dict
-            return sorted(self.__target_names_dict_noLongTail__[target_id], key=lambda x: x[1], reverse=True)[0]
+            return sorted(self.__target_names_dict_noLongTail__[target_id].items(), key=lambda x: x[1], reverse=True)[0][0]
         else:  # superset of noLongTail dict,  so no problems with general inquiries
-            return sorted(self.__target_names_dict__[target_id], key=lambda x: x[1], reverse=True)[0]
+            return sorted(self.__target_names_dict__[target_id].items(), key=lambda x: x[1], reverse=True)[0][0]
 
     def getData(self, offset=0, n=None, cut_long_tail=False):
         """
