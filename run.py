@@ -1,6 +1,7 @@
 import sys
 
 from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn import metrics
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.pipeline import Pipeline
@@ -44,7 +45,7 @@ def e1():
     Full text gets tokenized and transformed into a binary term-document-matrix.
     Dataset with long tail
     """
-    print('========== e1: BINARY BOW BASELINE WITH LONG TAIL BEGIN ==========')
+    print('========== e1: BINARY BOW WITH LONG TAIL BEGIN ==========')
     e1_preproc_text = tp.TextProcessor(blind_urls=False, remove_urls=False, remove_user_mentions=False,
                                        remove_hashtags=False,
                                        transform_lowercase=False, expand_urls=False)
@@ -68,16 +69,16 @@ def e1():
     target_names_longtail = [dataset.getTargetName(x) for x in labels]
     print(metrics.classification_report(test_targets, e1_predicted, labels=labels_longtail,
                                         target_names=target_names_longtail, digits=4))
-    print('========== e1: BINARY BOW BASELINE END ==========')
+    print('========== e1: BINARY BOW END ==========')
 
 
 def e2():
     """
     E2 - Binary BagOfWords without long-tail
     Full text gets tokenized and transformed into a binary term-document-matrix.
-    Dataset with long tail
+    Dataset without long tail
     """
-    print('========== e2: BINARY BOW BASELINE WITHOUT LONG-TAIL BEGIN ==========')
+    print('========== e2: BINARY BOW WITHOUT LONG-TAIL BEGIN ==========')
     e2_preproc_text = tp.TextProcessor(blind_urls=False, remove_urls=False, remove_user_mentions=False,
                                        remove_hashtags=False,
                                        transform_lowercase=False, expand_urls=False)
@@ -97,9 +98,39 @@ def e2():
     target_names = [dataset.getTargetName(x) for x in labels]
     print(metrics.classification_report(test_targets_nlt, e2_predicted, labels=labels, target_names=target_names,
                                         digits=4))
-    print('========== e2: BINARY BOW BASELINE WITHOUT LONG-TAIL END ==========')
+    print('========== e2: BINARY BOW WITHOUT LONG-TAIL END ==========')
+
+
+def e3():
+    """
+        E3 - TF/IDF BagOfWords without long-tail
+        Full text gets tokenized and transformed into a tf/idf weighted term-document-matrix.
+        Dataset without long tail
+        """
+    print('========== e3: TF/IDF BOW WITHOUT LONG-TAIL BEGIN ==========')
+    e3_preproc_text = tp.TextProcessor(blind_urls=False, remove_urls=False, remove_user_mentions=False,
+                                       remove_hashtags=False,
+                                       transform_lowercase=False, expand_urls=False)
+    print('** preproc config:', e3_preproc_text, '**')
+    print('Training classifier...', end='', flush=True)
+    pipeline_e3 = Pipeline(
+        [('vect', TfidfVectorizer(preprocessor=e3_preproc_text, tokenizer=tok, lowercase=False)),
+         ('clf', MultinomialNB()),
+         ])
+    pipeline_e3.fit(raw_train_data_nlt, train_targets_nlt)
+    print('done.')
+    print('Predicting test data...', end='', flush=True)
+    e3_predicted = pipeline_e3.predict(raw_test_data_nlt)
+    print('done.')
+    print('--- FULL CLASSIFICATION REPORT WITH ALL CLASSES ---')
+    labels = list(set(test_targets_nlt))  # take only labels that have support
+    target_names = [dataset.getTargetName(x) for x in labels]
+    print(metrics.classification_report(test_targets_nlt, e3_predicted, labels=labels, target_names=target_names,
+                                        digits=4))
+    print('========== e3: TF/IDF BOW WITHOUT LONG-TAIL END ==========')
 
 
 """Run experiments"""
 e1()
 e2()
+e3()
