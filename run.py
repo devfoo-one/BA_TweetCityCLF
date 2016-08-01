@@ -28,8 +28,6 @@ raw_train_data_nlt, train_targets_nlt = dataset.getData(n=len(dataset) * 0.8,
                                                         cut_long_tail=True)  # get 80% of data for training
 raw_test_data_nlt, test_targets_nlt = dataset.getData(offset=len(dataset) * 0.8, n=len(dataset) * 0.1,
                                                       cut_long_tail=True)  # get another 10% for testing
-test_target_names = dataset.__target_names_list__[int(len(dataset) * 0.8):int(len(dataset) * 0.9)]
-test_target_names_nlt = dataset.__target_names_list_noLongTail__[int(len(dataset) * 0.8):int(len(dataset) * 0.9)]
 
 """
     E1 - Binary BagOfWords
@@ -37,7 +35,6 @@ test_target_names_nlt = dataset.__target_names_list_noLongTail__[int(len(dataset
     Dataset without long tail
 """
 print('---------- e1: BINARY BOW BASELINE BEGIN ----------')
-
 e1_preproc_text = tp.TextProcessor(blind_urls=False, remove_urls=False, remove_user_mentions=False,
                                    remove_hashtags=False,
                                    transform_lowercase=False, expand_urls=False)
@@ -51,47 +48,7 @@ print('done.')
 print('Predicting test data...', end='', flush=True)
 e1_predicted = clf_e1.predict(raw_test_data_nlt)
 print('done.')
-
-for pred, eval in zip(e1_predicted, test_targets_nlt):
-    print(pred, eval)
-
-# print('MEAN = ', np.mean(e1_predicted == test_targets_nlt))
-# print(metrics.classification_report(test_targets_nlt, e1_predicted))
-# print(metrics.classification_report(test_targets_nlt, e1_predicted, target_names=test_target_names_nlt))
-
-
-# print(metrics.classification_report(test_targets, e1_predicted))
-# print('PRECISION =',
-#       metrics.precision_score(test_targets, predicted, average='macro', labels=dataset.__target_names_list_noLongTail__))
-# print('RECALL =', metrics.recall_score(test_targets, predicted, average='macro'))
-# print('F1 =', metrics.f1_score(test_targets, predicted, average='macro'))
-
-# for targetId in dataset.__target_names_noLongTail__:
-#     print(dataset.getTargetName(targetId))
-#     print(metrics.precision_recall_fscore_support(test_targets, predicted, labels=list(targetId)))
-# print(metrics.classification_report(test_targets, predicted))
-
+labels = list(set(test_targets_nlt))  # take only labels that have support
+target_names = [dataset.getTargetName(x) for x in labels]
+print(metrics.classification_report(test_targets_nlt, e1_predicted, labels=labels, target_names=target_names, digits=4))
 print('---------- e1: BINARY BOW BASELINE END ----------')
-
-# for tweet, target, predict in zip(train_data_e1, train_targets_e1, predicted):
-#     print(dataset.getTargetName(target), dataset.getTargetName(predict))
-# print(np.mean(predicted == test_targets_e1))
-
-# train_data = [x['text'] for x in dataset.data[:1000]]
-# train_targets = dataset.targets[:1000]
-# test_data = [x['text'] for x in  dataset.data[1001:1100]]
-# test_targets = dataset.targets[1001:1100]
-# from sklearn.naive_bayes import MultinomialNB
-# from sklearn.pipeline import Pipeline
-# from sklearn.feature_extraction.text import CountVectorizer
-# from sklearn.feature_extraction.text import TfidfTransformer
-#
-# text_clf = Pipeline([('vect', CountVectorizer()),
-#                      ('tfidf', TfidfTransformer()),
-#                      ('clf', MultinomialNB()),
-# ])
-#
-# import numpy as np
-# text_clf.fit(train_data, train_targets)
-# predicted = text_clf.predict(test_data)
-# print(np.mean(predicted == test_targets))

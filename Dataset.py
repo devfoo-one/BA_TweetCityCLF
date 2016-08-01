@@ -74,8 +74,6 @@ class Dataset:
         self.__data__ = []  # filtered tweet objects
         self.__targets__ = []  # targets
         self.__targets_noLongTail__ = []  # targets with 'other' class
-        self.__target_names_list__ = []  # target names
-        self.__target_names_list_noLongTail__ = [] # target names with 'other' class
 
         print('DATASET: Initialising with file', dataset)
         print('DATASET: Reading JSON... ', end='', flush=True)
@@ -120,11 +118,6 @@ class Dataset:
         for t in enumerate(self.__targets_noLongTail__):
             if t[1] in other_ids:
                 self.__targets_noLongTail__[t[0]] = 'other'
-        print('done.')
-
-        print("DATASET: Generating target name lists... ", end='', flush=True)
-        self.__target_names_list__ = [self.getTargetName(t) for t in self.__targets__]
-        self.__target_names_list_noLongTail__ = [self.getTargetName(t) for t in self.__targets_noLongTail__]
         print('done.')
 
     def __addTargetName__(self, key, name):
