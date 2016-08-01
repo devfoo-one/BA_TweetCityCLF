@@ -24,11 +24,12 @@ tok = tweet_tokenizer.Tokenizer()
     |               80% TRAIN            | 10% TEST | 10% VALI |
      ----------------------------------------------------------
 """
-raw_train_data, train_targets = dataset.getData(n=len(dataset) * 0.8,
-                                                cut_long_tail=True)  # get 80% of data for training
-raw_test_data, test_targets = dataset.getData(offset=len(dataset) * 0.8, n=len(dataset) * 0.1,
-                                              cut_long_tail=True)  # get another 10% for testing
-test_target_names_noLongTail = dataset.__target_names_list_noLongTail__[int(len(dataset) * 0.8):int(len(dataset) * 0.9)]
+raw_train_data_nlt, train_targets_nlt = dataset.getData(n=len(dataset) * 0.8,
+                                                        cut_long_tail=True)  # get 80% of data for training
+raw_test_data_nlt, test_targets_nlt = dataset.getData(offset=len(dataset) * 0.8, n=len(dataset) * 0.1,
+                                                      cut_long_tail=True)  # get another 10% for testing
+test_target_names = dataset.__target_names_list__[int(len(dataset) * 0.8):int(len(dataset) * 0.9)]
+test_target_names_nlt = dataset.__target_names_list_noLongTail__[int(len(dataset) * 0.8):int(len(dataset) * 0.9)]
 
 """
     E1 - Binary BagOfWords
@@ -41,18 +42,25 @@ e1_preproc_text = tp.TextProcessor(blind_urls=False, remove_urls=False, remove_u
                                    remove_hashtags=False,
                                    transform_lowercase=False, expand_urls=False)
 print('** preproc config:', e1_preproc_text, '**')
-test_data_e1 = [e1_preproc_text.digest(tweet) for tweet in raw_test_data]
 print('Training classifier...', end='', flush=True)
 clf_e1 = Pipeline([('vect', CountVectorizer(preprocessor=e1_preproc_text, tokenizer=tok, lowercase=False, binary=True)),
                    ('clf', MultinomialNB()),
                    ])
-clf_e1.fit(raw_train_data, train_targets)
+clf_e1.fit(raw_train_data_nlt, train_targets_nlt)
 print('done.')
 print('Predicting test data...', end='', flush=True)
-e1_predicted = clf_e1.predict(raw_test_data)
+e1_predicted = clf_e1.predict(raw_test_data_nlt)
 print('done.')
-print('MEAN = ', np.mean(e1_predicted == test_targets))
-# print(metrics.classification_report(test_targets, predicted, target_names=test_target_names_noLongTail))
+
+for pred, eval in zip(e1_predicted, test_targets_nlt):
+    print(pred, eval)
+
+# print('MEAN = ', np.mean(e1_predicted == test_targets_nlt))
+# print(metrics.classification_report(test_targets_nlt, e1_predicted))
+# print(metrics.classification_report(test_targets_nlt, e1_predicted, target_names=test_target_names_nlt))
+
+
+# print(metrics.classification_report(test_targets, e1_predicted))
 # print('PRECISION =',
 #       metrics.precision_score(test_targets, predicted, average='macro', labels=dataset.__target_names_list_noLongTail__))
 # print('RECALL =', metrics.recall_score(test_targets, predicted, average='macro'))

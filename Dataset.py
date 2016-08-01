@@ -123,10 +123,8 @@ class Dataset:
         print('done.')
 
         print("DATASET: Generating target name lists... ", end='', flush=True)
-        for target in self.__targets__:
-            self.__target_names_list__.append(self.getTargetName(target))
-        for target in self.__targets_noLongTail__:
-            self.__target_names_list_noLongTail__.append(self.getTargetName(target))
+        self.__target_names_list__ = [self.getTargetName(t) for t in self.__targets__]
+        self.__target_names_list_noLongTail__ = [self.getTargetName(t) for t in self.__targets_noLongTail__]
         print('done.')
 
     def __addTargetName__(self, key, name):
