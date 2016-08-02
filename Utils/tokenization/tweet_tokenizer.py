@@ -1,5 +1,6 @@
 import re
 
+
 class Tokenizer:
     def __call__(self, t):
         t = str(t)
@@ -8,4 +9,5 @@ class Tokenizer:
         links = links_re.findall(t)  # exctract links
         for l in links:
             t = t.replace(l, '')
-        return split_re.split(t) + links  # add unmodified links
+        retVal = split_re.split(t) + links  # add unmodified links
+        return [str(x).strip() for x in retVal]  # remove leading and trailing whitespace
