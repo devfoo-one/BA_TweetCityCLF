@@ -1,7 +1,7 @@
 import re
 
 
-class Tokenizer:
+class TweetTokenizer:
     def __call__(self, t):
         t = str(t)
         links_re = re.compile('http[s]?://\S+')
@@ -11,3 +11,7 @@ class Tokenizer:
             t = t.replace(l, '')
         retVal = split_re.split(t) + links  # add unmodified links
         return [str(x).strip() for x in retVal]  # remove leading and trailing whitespace
+
+class ArbitraryFeatureTokenizer:
+    def __call(self, t):
+        pass  # TODO: IMPLEMENT ME

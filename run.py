@@ -10,7 +10,7 @@ from sklearn.pipeline import Pipeline
 
 from Dataset import Dataset
 from Utils.preprocessing import preproc_text as tp
-from Utils.tokenization import tweet_tokenizer
+from Utils.tokenization import Tokenize
 
 dataset_path = sys.argv[1]
 
@@ -18,7 +18,7 @@ dataset_path = sys.argv[1]
 dataset = Dataset(dataset=dataset_path)
 
 """ Initialise default tokenizer """
-tok = tweet_tokenizer.Tokenizer()
+tok = Tokenize.TweetTokenizer()
 
 """
     Split data into train, test and validation
