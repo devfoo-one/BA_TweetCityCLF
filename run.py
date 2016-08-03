@@ -73,19 +73,19 @@ def e1():
     print(metrics.classification_report(test_targets, e1_predicted, labels=labels_longtail,
                                         target_names=target_names_longtail, digits=4))
 
-    # TODO THIS PART PRODUCES CRAP
-    # print('Top 20 features by chi2...')
-    # vectorizer_e1 = CountVectorizer(preprocessor=e1_preproc_text, tokenizer=tok, lowercase=False, binary=True)
-    # tdm_e1 = vectorizer_e1.fit_transform(raw_train_data)
-    # feature_names = vectorizer_e1.get_feature_names()
-    # ch2 = SelectKBest(chi2, k=20)
-    # best_features_e1 = ch2.fit_transform(tdm_e1, train_targets)
-    # for i, feature_id in enumerate(ch2.get_support(indices=True).tolist()):
-    #     print('-- Feature: "', feature_names[feature_id], '" --', sep='')
-    #     samples = best_features_e1.getcol(i)
-    #     for sample, a in enumerate(samples.toarray()):
-    #         if a != 0:
-    #             print(sample, raw_train_data[sample]['text'].strip(), '-->', dataset.getTargetName(train_targets[sample]))
+    print('--- TOP 20 FEATURES BY CHI2 SELECTION---')
+    ch2 = SelectKBest(chi2, k=20)
+    vectorizer_e1 = CountVectorizer(preprocessor=e1_preproc_text, tokenizer=tok, lowercase=False, binary=True)
+    tdm_e1 = vectorizer_e1.fit_transform(raw_train_data)
+    feature_names = vectorizer_e1.get_feature_names()
+    ch2.fit_transform(tdm_e1, train_targets)
+    for i in ch2.get_support(indices=True):  # returns feature indices of original tdm
+        targets_for_feature = []
+        for doc, a in enumerate(tdm_e1.getcol(i)):  # get tdm col for feature i
+            if a != 0:  # check if feature is present in col
+                target = train_targets[doc]  # get target for document
+                targets_for_feature.append(target)
+        print("'", feature_names[i], "' ", [dataset.getTargetName(x) for x in targets_for_feature])
 
     print('========== e1: BINARY BOW END ==========')
 
@@ -177,8 +177,9 @@ def e4():
                                         digits=4))
     print('========== e4: TF/IDF BOW WITHOUT LONG-TAIL CLEANED TWEET 1 END ==========')
 
+
 """Run experiments"""
-# e1()
+e1()
 # e2()
 # e3()
-e4()
+# e4()
