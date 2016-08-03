@@ -124,6 +124,6 @@ plt.gca().set_xlabel("support")
 plt.gca().set_ylabel("f1 score")
 for i, label in enumerate(labels):
     if f_score[i] > 0.3 and support[i] > 2000:
-        plt.annotate(s=label, xy=(support[i], f_score[i]), xytext=(support[i] + 200, f_score[i] + 0.015))
+        plt.annotate(s=label, xy=(support[i], f_score[i]), xytext=(support[i] + 250, f_score[i]))
 
 plt.show()
