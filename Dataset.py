@@ -11,9 +11,9 @@ def extractPlace(json_obj):
     :param json_obj: twitter place object
     :return: (id, place)
     """
-    id = json_obj['place']['id']
+    place_id = json_obj['place']['id']
     place = json_obj['place']
-    return id, place
+    return place_id, place
 
 
 def incrementCounterDict(key, dictionary):
