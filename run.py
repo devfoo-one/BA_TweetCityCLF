@@ -23,22 +23,24 @@ tok = Tokenize.TweetTokenizer()
 """
     Split data into train, test and validation
      ----------------------------------------------------------
-    |               80% TRAIN            | 10% TEST | 10% VALI |
+    |               70% TRAIN            | 15% TEST | 15% VALI |
      ----------------------------------------------------------
 """
-PERCENT_TRAIN = 0.8
-PERCENT_TEST = 0.1
-PERCENT_EVAL = 0.1
+PERCENT_TRAIN = 0.7
+PERCENT_TEST = 0.15
+PERCENT_EVAL = 0.15
 
 raw_train_data, train_targets = dataset.getData(n=len(dataset) * PERCENT_TRAIN,
-                                                cut_long_tail=False)  # get 80% of data for training
+                                                cut_long_tail=False)
 raw_train_data_nlt, train_targets_nlt = dataset.getData(n=len(dataset) * PERCENT_TRAIN,
-                                                        cut_long_tail=True)  # get 80% of data for training
-raw_test_data, test_targets = dataset.getData(offset=len(dataset) * PERCENT_TRAIN, n=len(dataset) * PERCENT_TEST,
-                                              cut_long_tail=False)  # get another 10% for testing
+                                                        cut_long_tail=True)
+
+raw_test_data, test_targets = dataset.getData(offset=len(dataset) * PERCENT_TRAIN,
+                                              n=len(dataset) * PERCENT_TEST,
+                                              cut_long_tail=False)
 raw_test_data_nlt, test_targets_nlt = dataset.getData(offset=len(dataset) * PERCENT_TRAIN,
                                                       n=len(dataset) * PERCENT_TEST,
-                                                      cut_long_tail=True)  # get another 10% for testing
+                                                      cut_long_tail=True)
 
 
 def e1():
