@@ -116,7 +116,7 @@ def e2():
     print('Predicting test data...', end='', flush=True)
     predicted = pipeline.predict(raw_test_data_nlt)
     print('done.')
-    print('--- FULL CLASSIFICATION REPORT WITH ALL CLASSES ---')
+    print('--- FULL CLASSIFICATION REPORT ---')
     labels = list(set(test_targets_nlt))  # take only labels that have support
     target_names = [dataset.getTargetName(x) for x in labels]
     print(metrics.classification_report(test_targets_nlt, predicted, labels=labels, target_names=target_names,
@@ -145,7 +145,7 @@ def e3():
     print('Predicting test data...', end='', flush=True)
     predicted = pipeline.predict(raw_test_data_nlt)
     print('done.')
-    print('--- FULL CLASSIFICATION REPORT WITH ALL CLASSES ---')
+    print('--- FULL CLASSIFICATION REPORT ---')
     labels = list(set(test_targets_nlt))  # take only labels that have support
     target_names = [dataset.getTargetName(x) for x in labels]
     print(metrics.classification_report(test_targets_nlt, predicted, labels=labels, target_names=target_names,
@@ -175,7 +175,7 @@ def e4():
     print('Predicting test data...', end='', flush=True)
     predicted = pipeline.predict(raw_test_data_nlt)
     print('done.')
-    print('--- FULL CLASSIFICATION REPORT WITH ALL CLASSES ---')
+    print('--- FULL CLASSIFICATION REPORT ---')
     labels = list(set(test_targets_nlt))  # take only labels that have support
     target_names = [dataset.getTargetName(x) for x in labels]
     print(metrics.classification_report(test_targets_nlt, predicted, labels=labels, target_names=target_names,
@@ -220,7 +220,7 @@ def e5():
     print('Predicting test data...', end='', flush=True)
     predicted = pipeline.predict(raw_test_data_nlt)
     print('done.')
-    print('--- FULL CLASSIFICATION REPORT WITH ALL CLASSES ---')
+    print('--- FULL CLASSIFICATION REPORT ---')
     labels = list(set(test_targets_nlt))  # take only labels that have support
     target_names = [dataset.getTargetName(x) for x in labels]
     print(metrics.classification_report(test_targets_nlt, predicted, labels=labels, target_names=target_names,
@@ -230,8 +230,8 @@ def e5():
 
 
 """Run experiments"""
-# e1()
-# e2()
-# e3()
-# e4()
+e1()
+e2()
+e3()
+e4()
 e5()
