@@ -42,6 +42,9 @@ raw_test_data_nlt, test_targets_nlt = dataset.getData(offset=len(dataset) * PERC
                                                       n=len(dataset) * PERCENT_TEST,
                                                       cut_long_tail=True)
 
+print('SAMPLES = {}, TRAIN = {} ({}%), TEST = {} ({}%)'.format(len(dataset), len(raw_train_data), PERCENT_TRAIN,
+                                                               len(raw_test_data), PERCENT_TEST))
+
 
 def e1():
     """
@@ -51,8 +54,8 @@ def e1():
     """
     print('========== e1: BINARY BOW WITH LONG TAIL BEGIN ==========')
     preproc_text = tp.TextProcessor(blind_urls=False, remove_urls=False, remove_user_mentions=False,
-                                       remove_hashtags=False,
-                                       transform_lowercase=False, expand_urls=False)
+                                    remove_hashtags=False,
+                                    transform_lowercase=False, expand_urls=False)
     print('** preproc config:', preproc_text, '**')
     print('Training classifier...', end='', flush=True)
     pipeline = Pipeline(
@@ -100,8 +103,8 @@ def e2():
     """
     print('========== e2: BINARY BOW WITHOUT LONG-TAIL BEGIN ==========')
     preproc_text = tp.TextProcessor(blind_urls=False, remove_urls=False, remove_user_mentions=False,
-                                       remove_hashtags=False,
-                                       transform_lowercase=False, expand_urls=False)
+                                    remove_hashtags=False,
+                                    transform_lowercase=False, expand_urls=False)
     print('** preproc config:', preproc_text, '**')
     print('Training classifier...', end='', flush=True)
     pipeline = Pipeline(
@@ -129,8 +132,8 @@ def e3():
         """
     print('========== e3: TF/IDF BOW WITHOUT LONG-TAIL BEGIN ==========')
     preproc_text = tp.TextProcessor(blind_urls=False, remove_urls=False, remove_user_mentions=False,
-                                       remove_hashtags=False,
-                                       transform_lowercase=False, expand_urls=False)
+                                    remove_hashtags=False,
+                                    transform_lowercase=False, expand_urls=False)
     print('** preproc config:', preproc_text, '**')
     print('Training classifier...', end='', flush=True)
     pipeline = Pipeline(
@@ -159,8 +162,8 @@ def e4():
         """
     print('========== e4: TF/IDF BOW WITHOUT LONG-TAIL CLEANED TWEET 1 BEGIN ==========')
     preproc_text = tp.TextProcessor(blind_urls=False, remove_urls=True, remove_user_mentions=True,
-                                       remove_hashtags=True,
-                                       transform_lowercase=True, expand_urls=False)
+                                    remove_hashtags=True,
+                                    transform_lowercase=True, expand_urls=False)
     print('** preproc config:', preproc_text, '**')
     print('Training classifier...', end='', flush=True)
     pipeline = Pipeline(
@@ -178,25 +181,57 @@ def e4():
     print(metrics.classification_report(test_targets_nlt, predicted, labels=labels, target_names=target_names,
                                         digits=4))
 
-    print('--- TOP 50 FEATURES BY CHI2 SELECTION---')
-    ch2 = SelectKBest(chi2, k=50)
-    vectorizer = CountVectorizer(preprocessor=preproc_text, tokenizer=tok, lowercase=False, binary=True)
-    tdm = vectorizer.fit_transform(raw_train_data_nlt)
-    feature_names = vectorizer.get_feature_names()
-    ch2.fit_transform(tdm, train_targets)
-    for i in ch2.get_support(indices=True):  # returns feature indices of original tdm
-        targets_for_feature = []
-        for doc, a in enumerate(tdm.getcol(i)):  # get tdm col for feature i
-            if a != 0:  # check if feature is present in col
-                target = train_targets_nlt[doc]  # get target for document
-                targets_for_feature.append(target)
-        print("'", feature_names[i], "' -> ", [dataset.getTargetName(x) for x in targets_for_feature], sep='')
+    # print('--- TOP 50 FEATURES BY CHI2 SELECTION---')
+    # ch2 = SelectKBest(chi2, k=50)
+    # vectorizer = CountVectorizer(preprocessor=preproc_text, tokenizer=tok, lowercase=False, binary=True)
+    # tdm = vectorizer.fit_transform(raw_train_data_nlt)
+    # feature_names = vectorizer.get_feature_names()
+    # ch2.fit_transform(tdm, train_targets)
+    # for i in ch2.get_support(indices=True):  # returns feature indices of original tdm
+    #     targets_for_feature = []
+    #     for doc, a in enumerate(tdm.getcol(i)):  # get tdm col for feature i
+    #         if a != 0:  # check if feature is present in col
+    #             target = train_targets_nlt[doc]  # get target for document
+    #             targets_for_feature.append(target)
+    #     print("'", feature_names[i], "' -> ", [dataset.getTargetName(x) for x in targets_for_feature], sep='')
 
     print('========== e4: TF/IDF BOW WITHOUT LONG-TAIL CLEANED TWEET 1 END ==========')
+
+
+def e5():
+    """
+        E5 - Character N-Grams
+        Made additional changes in preproc, see printed config
+        Full text gets tokenized and transformed into a tf/idf weighted term-document-matrix.
+        Dataset without long tail
+        """
+    print('========== e5: CHARACTER N GRAMS (1,3) WITHOUT LONG-TAIL EXPANDED URLS ==========')
+    preproc_text = tp.TextProcessor(blind_urls=False, remove_urls=False, remove_user_mentions=True,
+                                    remove_hashtags=False,
+                                    transform_lowercase=True, expand_urls=True)
+    print('** preproc config:', preproc_text, '**')
+    print('Training classifier...', end='', flush=True)
+    pipeline = Pipeline(
+        [('vect', CountVectorizer(preprocessor=preproc_text, analyzer='char', ngram_range=(1,3))),
+         ('clf', MultinomialNB()),
+         ])
+    pipeline.fit(raw_train_data_nlt, train_targets_nlt)
+    print('done.')
+    print('Predicting test data...', end='', flush=True)
+    predicted = pipeline.predict(raw_test_data_nlt)
+    print('done.')
+    print('--- FULL CLASSIFICATION REPORT WITH ALL CLASSES ---')
+    labels = list(set(test_targets_nlt))  # take only labels that have support
+    target_names = [dataset.getTargetName(x) for x in labels]
+    print(metrics.classification_report(test_targets_nlt, predicted, labels=labels, target_names=target_names,
+                                        digits=4))
+
+    print('========== e5: CHARACTER N GRAMS (1,3) WITHOUT LONG-TAIL EXPANDED URLS END ==========')
 
 
 """Run experiments"""
 # e1()
 # e2()
 # e3()
-e4()
+# e4()
+e5()
