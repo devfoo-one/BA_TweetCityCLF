@@ -1,9 +1,17 @@
 import json
 
 count_all = 0
-count_geo = 0
-count_place = 0
-count_geo_place = 0
+counter = {
+    'geo_place_coord': 0,
+    'geo_place_!coord': 0,
+    'geo_!place_coord': 0,
+    'geo_!place_!coord': 0,
+    '!geo_place_coord': 0,
+    '!geo_place_!coord': 0,
+    '!geo_!place_coord': 0,
+    '!geo_!place_!coord': 0,
+}
+
 with open('../../data/Germany.json') as dataset:
     for line in dataset:
         try:
@@ -12,22 +20,31 @@ with open('../../data/Germany.json') as dataset:
             continue  # could not decode json line, skipping.
         hasPlace = jsonObj['place'] is not None
         hasGeo = jsonObj['geo'] is not None
-        if hasGeo and hasPlace:
-            count_geo_place += 1
-        else:
-            if hasGeo:
-                count_geo += 1
-            if hasPlace:
-                count_place += 1
+        hasCoord = jsonObj['coordinates'] is not None
+
+        if hasGeo and hasPlace and hasCoord:
+            counter['geo_place_coord'] += 1
+        if hasGeo and hasPlace and not hasCoord:
+            counter['geo_place_!coord'] += 1
+        if hasGeo and not hasPlace and hasCoord:
+            counter['geo_!place_coord'] += 1
+        if hasGeo and not hasPlace and not hasCoord:
+            counter['geo_!place_!coord'] += 1
+        if not hasGeo and hasPlace and hasCoord:
+            counter['!geo_place_coord'] += 1
+        if not hasGeo and hasPlace and not hasCoord:
+            counter['!geo_place_!coord'] += 1
+        if not hasGeo and not hasPlace and hasCoord:
+            counter['!geo_!place_coord'] += 1
+        if not hasGeo and not hasPlace and not hasCoord:
+            counter['!geo_!place_!coord'] += 1
+
         count_all += 1
-        # if not hasPlace and not hasGeo:
-        #     print(json.dumps(jsonObj))
+
         if count_all % 100000 == 0:
-            print(
-                'all: {}, only_place: {}, only_geo: {}, both: {}, nothing: {}'.format(count_all, count_place, count_geo,
-                                                                                      count_geo_place, (
-                                                                                      count_all - count_geo_place - count_geo - count_place)))
-print(
-                'all: {}, only_place: {}, only_geo: {}, both: {}, nothing: {}'.format(count_all, count_place, count_geo,
-                                                                                      count_geo_place, (
-                                                                                      count_all - count_geo_place - count_geo - count_place)))
+            print(count_all)
+
+print('done. total:', count_all, 'sum counter:', sum(counter.values()))
+for key, value in counter.items():
+    print(key,'=', value)
+
