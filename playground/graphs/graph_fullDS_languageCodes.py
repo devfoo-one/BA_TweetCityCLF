@@ -87,6 +87,7 @@ labels.append('andere')
 print(labels)
 colors = c.qualitative
 explode = [0.1,0,0,0]
+plt.rcParams['font.size'] = 18.0
 plt.pie(sizes, labels=labels, startangle=90, counterclock=False, explode=explode, colors=colors, autopct='%1.1f%%')
 plt.axis('equal')
 plt.show()

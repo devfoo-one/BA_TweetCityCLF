@@ -30,7 +30,8 @@ class Colors:
     """
 
     def __init__(self):
-        self.qualitative = ['#403075', '#A8383B', '#328A2E', '#AA9639']
+        # self.qualitative = ['#403075', '#A8383B', '#328A2E', '#AA9639']
+        self.qualitative = ['#328A2E', '#A8383B', '#675997', '#AA9639']
         self.quantitative = [
             ['#0F0432', '#221353', '#403075', '#675997', '#9B91BB'],
             ['#480002', '#780F12', '#A8383B', '#D97577', '#FDBCBE'],
