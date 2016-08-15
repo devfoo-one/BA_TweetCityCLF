@@ -20,6 +20,7 @@ class TextProcessor:
     def digest(self, tweet):
         """Processes a tweet object (as given from the streaming api) and returns a string."""
         tweet_text = tweet['text']
+        # TODO ADD html.parser.HTMLParser().unescape(text)
 
         """remove URLs"""
         if self.config['remove_urls']:
