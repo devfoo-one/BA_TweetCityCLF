@@ -27,8 +27,8 @@ tok = Tokenize.TweetTokenizer()
      ----------------------------------------------------------
 """
 PERCENT_TRAIN = 0.7
-PERCENT_TEST = 0.15
-PERCENT_EVAL = 0.15
+PERCENT_TEST = 0.3
+# PERCENT_EVAL = 0.15
 
 raw_train_data, train_targets = dataset.getData(n=len(dataset) * PERCENT_TRAIN,
                                                 cut_long_tail=False)
@@ -42,7 +42,7 @@ raw_test_data_nlt, test_targets_nlt = dataset.getData(offset=len(dataset) * PERC
                                                       n=len(dataset) * PERCENT_TEST,
                                                       cut_long_tail=True)
 
-print('SAMPLES = {}, TRAIN = {} ({}%), TEST = {} ({}%)'.format(len(dataset), len(raw_train_data), PERCENT_TRAIN,
+print('SAMPLES = {}, TRAIN = {} ({:.2%}), TEST = {} ({:.2%})'.format(len(dataset), len(raw_train_data), PERCENT_TRAIN,
                                                                len(raw_test_data), PERCENT_TEST))
 
 
@@ -230,8 +230,8 @@ def e5():
 
 
 """Run experiments"""
-e1()
+# e1()
 e2()
-e3()
-e4()
-e5()
+# e3()
+# e4()
+# e5()
