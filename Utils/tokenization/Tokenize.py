@@ -1,9 +1,10 @@
-import re
+import re, html.parser
 
 
 class TweetTokenizer:
     def __call__(self, t):
         t = str(t)
+        t = html.parser.HTMLParser().unescape(t)
         links_re = re.compile('http[s]?://\S+')
         split_re = re.compile('[\s\r\n\.,\?!]+')
         links = links_re.findall(t)  # exctract links
