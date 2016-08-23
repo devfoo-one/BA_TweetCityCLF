@@ -25,12 +25,17 @@ class PrintingScorer:
         :return: f1_weighted score, this is necessary for comparison if this scorer is used in a grid search.
         """
         y_predicted = estimator.predict(X)
-        precision = precision_score(y, y_predicted)
-        recall = recall_score(y, y_predicted)
+        precision_micro = precision_score(y, y_predicted, average='micro')
+        precision_macro = precision_score(y, y_predicted, average='macro')
+        precision_weighted = precision_score(y, y_predicted, average='weighted')
+        recall_micro = recall_score(y, y_predicted, average='micro')
+        recall_macro = recall_score(y, y_predicted, average='macro')
+        recall_weighted = recall_score(y, y_predicted, average='weighted')
         f1_micro = f1_score(y, y_predicted, average='micro')
         f1_macro = f1_score(y, y_predicted, average='macro')
         f1_weighted = f1_score(y, y_predicted, average='weighted')
-        print(
-            "Precision: {}, Recall: {}, F1_micro: {}, F1_macro: {}, F1_weighted: {}".format(precision, recall, f1_micro,
-                                                                                            f1_macro, f1_weighted))
+        print('--- PrintingScorer ---')
+        print("Precision:\tmicro={}\tmacro={}\tweighted={}".format(precision_micro, precision_macro, precision_weighted))
+        print("Recall:\t\tmicro={}\tmacro={}\tweighted={}".format(recall_micro, recall_macro, recall_weighted))
+        print("F-Measure:\tmicro={}\tmacro={}\tweighted={}".format(f1_micro, f1_macro, f1_weighted))
         return f1_weighted
