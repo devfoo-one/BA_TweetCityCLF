@@ -3,7 +3,9 @@ import matplotlib.pyplot as plt
 from playground.graphs.colors import Colors
 c = Colors()
 
-count_tokens = pickle.load(open('../count_tokens.pickle', 'rb'))
+# count_tokens = pickle.load(open('../count_tokens.pickle', 'rb'))
+# count_tokens = pickle.load(open('../userLocation_count_tokens.pickle', 'rb'))
+count_tokens = pickle.load(open('../userLocation_count_chars.pickle', 'rb'))
 
 tokens = [x[0] for x in count_tokens.items()]
 counts = [x[1] for x in count_tokens.items()]
