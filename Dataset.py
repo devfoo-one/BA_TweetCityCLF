@@ -59,10 +59,11 @@ def cleanTweetObj(tweet):
 
 
 class Dataset:
-    def __init__(self, dataset):
+    def __init__(self, dataset, long_tail_cutoff=0.9):
         """
         Reads json file with one tweet per line
         :param dataset: Path to data file
+        :param long_tail_cutoff: Percentage, after top n percent classes, all data will get associated to "other" class.
         """
         self.__data_count__ = 0
         self.__target_names_dict__ = {}  # k: target id, v: {name: count of name string}
@@ -84,7 +85,7 @@ class Dataset:
                 continue  # could not decode json line, skipping.
             try:
                 if (jsonObj['lang'] == 'de') and (jsonObj['place'] is not None) and (
-                            jsonObj['place']['place_type'] == 'city' and jsonObj['place']['country_code'] == 'DE'):
+                                jsonObj['place']['place_type'] == 'city' and jsonObj['place']['country_code'] == 'DE'):
                     place_id, place = extractPlace(jsonObj)
                     incrementCounterDict(place_id, self.__target_counter__)  # increment place counter
                     self.__addTargetName__(place_id, place['name'])
@@ -95,8 +96,9 @@ class Dataset:
                 continue  # Tweet has no lang or place.placetype. skipping.
         print('done.')
 
-        print("DATASET: Generating 'other' class for last 10% (long tail) target classes... ", end='', flush=True)
-        """Cut last 10% of targets and point it to class 'other'"""
+        print("DATASET: Generating 'other' class for last {:.2%} (long tail) target classes... ".format(long_tail_cutoff), end='', flush=True)
+        """Cut last N% of targets and point it to class 'other', long_tail_cutoff percentage is given in constructor"""
+
         self.__targets_noLongTail__ = list(self.__targets__)
         self.__target_counter_noLongTail__ = dict(self.__target_counter__)
         self.__target_names_dict_noLongTail__ = dict(self.__target_names_dict__)
@@ -109,7 +111,7 @@ class Dataset:
             target_id = target[0]
             target_count = target[1]
             percentage_counter += target_count
-            if percentage_counter / self.__data_count__ >= 0.9:
+            if percentage_counter / self.__data_count__ >= long_tail_cutoff:
                 class_other_n += target_count
                 other_ids.append(target_id)
                 self.__target_counter_noLongTail__.pop(target_id)
@@ -139,7 +141,8 @@ class Dataset:
         :return: str, most frequent name for this target id
         """
         if target_id == 'other':  # if someone asks for 'other' then use this dict
-            return sorted(self.__target_names_dict_noLongTail__[target_id].items(), key=lambda x: x[1], reverse=True)[0][0]
+            return \
+                sorted(self.__target_names_dict_noLongTail__[target_id].items(), key=lambda x: x[1], reverse=True)[0][0]
         else:  # superset of noLongTail dict,  so no problems with general inquiries
             return sorted(self.__target_names_dict__[target_id].items(), key=lambda x: x[1], reverse=True)[0][0]
 
