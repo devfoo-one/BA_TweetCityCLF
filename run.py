@@ -25,18 +25,14 @@ dataset = Dataset(dataset=dataset_path)
 """ Initialise default tokenizer """
 tok = Tokenize.TweetTokenizer()
 
-""" Initialise PrintScorer for cross-validation"""
-scorer = CrossValidation.PrintingScorer()
-
-
 """
     Split data into train, test and validation
      ----------------------------------------------------------
     |               70% TRAIN            |      30% TEST       |
      ----------------------------------------------------------
 """
-PERCENT_TRAIN = 0.99
-PERCENT_TEST = 0.01
+PERCENT_TRAIN = 0.7
+PERCENT_TEST = 0.3
 
 raw_train_data, train_targets = dataset.getData(n=len(dataset) * PERCENT_TRAIN,
                                                 cut_long_tail=False)
@@ -104,6 +100,9 @@ def e2():
                                     transform_lowercase=False, expand_urls=False)
     print('** preproc config:', preproc_text, '**')
 
+    """ Initialise PrintScorer for cross-validation"""
+    scorer = CrossValidation.PrintingScorer()
+
     print('Cross Validation with 90% long-tail-cutoff...', end='', flush=True)
     pipeline = Pipeline(
         [('vect', CountVectorizer(preprocessor=preproc_text, tokenizer=tok, lowercase=False, binary=True)),
@@ -112,13 +111,13 @@ def e2():
     cross_validation.cross_val_score(pipeline, raw_train_data_nlt, train_targets_nlt, cv=5, n_jobs=5, scoring=scorer)
     print('done.')
 
-    print('Cross Validation with 50% long-tail-cutoff...', end='', flush=True)
     dataset_50percent = Dataset(dataset_path, long_tail_cutoff=0.5)
-    raw_train_data_nlt_50, targets_nlt_50 = dataset_50percent.getData(cut_long_tail=True)
-    cross_validation.cross_val_score(pipeline, raw_train_data_nlt_50, targets_nlt_50, cv=5, n_jobs=5, scoring=scorer)
+    print('Cross Validation with 50% long-tail-cutoff...', end='', flush=True)
+    raw_data_nlt_50, targets_nlt_50 = dataset_50percent.getData(cut_long_tail=True)
+    cross_validation.cross_val_score(pipeline, raw_data_nlt_50, targets_nlt_50, cv=5, n_jobs=5, scoring=scorer)
     print('done.')
     print('--- CLASSIFICATION REPORT FOR LONG-TAIL-CUTOFF 50% CLASSES ---')
-    predicted = cross_validation.cross_val_predict(pipeline, raw_train_data_nlt_50, targets_nlt_50, cv=5, n_jobs=5)
+    predicted = cross_validation.cross_val_predict(pipeline, raw_data_nlt_50, targets_nlt_50, cv=5, n_jobs=5)
     labels = list(set(targets_nlt_50))  # take only labels that have support
     target_names = [dataset.getTargetName(x) for x in labels]
     print(metrics.classification_report(targets_nlt_50, predicted, labels=labels,
@@ -132,26 +131,18 @@ def e3():
         Full text gets tokenized and transformed into a tf/idf weighted term-document-matrix.
         Dataset without long tail
         """
-    print('========== e3: TF/IDF BOW WITHOUT LONG-TAIL BEGIN ==========')
+    print('========== e3: TF/IDF BOW WITHOUT LONG-TAIL (0.9 CutOff) BEGIN ==========')
     preproc_text = tp.TextProcessor(blind_urls=False, remove_urls=False, remove_user_mentions=False,
                                     remove_hashtags=False,
                                     transform_lowercase=False, expand_urls=False)
     print('** preproc config:', preproc_text, '**')
-    print('Training classifier...', end='', flush=True)
+    print('Cross Validation...', end='', flush=True)
     pipeline = Pipeline(
-        [('vect', TfidfVectorizer(preprocessor=preproc_text, tokenizer=tok, lowercase=False)),
+        [('vect', TfidfVectorizer(preprocessor=preproc_text, tokenizer=tok, lowercase=False, use_idf=True, )),
          ('clf', MultinomialNB()),
          ])
-    pipeline.fit(raw_train_data_nlt, train_targets_nlt)
+    cross_validation.cross_val_score(pipeline, raw_train_data_nlt, train_targets_nlt, cv=5, n_jobs=5, scoring=scorer)
     print('done.')
-    print('Predicting test data...', end='', flush=True)
-    predicted = pipeline.predict(raw_test_data_nlt)
-    print('done.')
-    print('--- FULL CLASSIFICATION REPORT ---')
-    labels = list(set(test_targets_nlt))  # take only labels that have support
-    target_names = [dataset.getTargetName(x) for x in labels]
-    print(metrics.classification_report(test_targets_nlt, predicted, labels=labels, target_names=target_names,
-                                        digits=4))
     print('========== e3: TF/IDF BOW WITHOUT LONG-TAIL END ==========')
 
 
