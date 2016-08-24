@@ -1,3 +1,4 @@
+from sklearn.metrics import accuracy_score
 from sklearn.metrics import f1_score
 from sklearn.metrics import precision_score
 from sklearn.metrics import recall_score
@@ -34,8 +35,10 @@ class PrintingScorer:
         f1_micro = f1_score(y, y_predicted, average='micro')
         f1_macro = f1_score(y, y_predicted, average='macro')
         f1_weighted = f1_score(y, y_predicted, average='weighted')
+        accuracy = accuracy_score(y, y_predicted)
         print('--- PrintingScorer ---')
         print("Precision:\tmicro={}\tmacro={}\tweighted={}".format(precision_micro, precision_macro, precision_weighted))
         print("Recall:\t\tmicro={}\tmacro={}\tweighted={}".format(recall_micro, recall_macro, recall_weighted))
         print("F-Measure:\tmicro={}\tmacro={}\tweighted={}".format(f1_micro, f1_macro, f1_weighted))
+        print("Accuracy:\t{}".format(accuracy))
         return f1_weighted
