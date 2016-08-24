@@ -136,6 +136,10 @@ def e3():
                                     remove_hashtags=False,
                                     transform_lowercase=False, expand_urls=False)
     print('** preproc config:', preproc_text, '**')
+
+    """ Initialise PrintScorer for cross-validation"""
+    scorer = CrossValidation.PrintingScorer()
+
     print('Cross Validation...', end='', flush=True)
     pipeline = Pipeline(
         [('vect', TfidfVectorizer(preprocessor=preproc_text, tokenizer=tok, lowercase=False, use_idf=True, )),
@@ -173,21 +177,6 @@ def e4():
     target_names = [dataset.getTargetName(x) for x in labels]
     print(metrics.classification_report(test_targets_nlt, predicted, labels=labels, target_names=target_names,
                                         digits=4))
-
-    # print('--- TOP 50 FEATURES BY CHI2 SELECTION---')
-    # ch2 = SelectKBest(chi2, k=50)
-    # vectorizer = CountVectorizer(preprocessor=preproc_text, tokenizer=tok, lowercase=False, binary=True)
-    # tdm = vectorizer.fit_transform(raw_train_data_nlt)
-    # feature_names = vectorizer.get_feature_names()
-    # ch2.fit_transform(tdm, train_targets)
-    # for i in ch2.get_support(indices=True):  # returns feature indices of original tdm
-    #     targets_for_feature = []
-    #     for doc, a in enumerate(tdm.getcol(i)):  # get tdm col for feature i
-    #         if a != 0:  # check if feature is present in col
-    #             target = train_targets_nlt[doc]  # get target for document
-    #             targets_for_feature.append(target)
-    #     print("'", feature_names[i], "' -> ", [dataset.getTargetName(x) for x in targets_for_feature], sep='')
-
     print('========== e4: TF/IDF BOW WITHOUT LONG-TAIL CLEANED TWEET 1 END ==========')
 
 
@@ -224,7 +213,7 @@ def e5():
 
 """Run experiments"""
 # e1()
-e2()
-# e3()
+# e2()
+e3()
 # e4()
 # e5()
