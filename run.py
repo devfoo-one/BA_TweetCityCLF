@@ -156,12 +156,21 @@ def e3():
 
     print('Grid Search...', end='', flush=True)
     # http://stackoverflow.com/questions/27697766/understanding-min-df-and-max-df-in-scikit-countvectorizer
-    parameters = {'vect__min_df': [x / 1000 for x in range(1, 11, 1)],  # test 0.001, 0.002, ... , 0.01
-                  'vect__max_df': [x / 10 for x in range(1, 11, 1)]  # test 0.0, 0.1, ... , 1.0
+    min_df_range = [x / 1000 for x in range(2, 12, 2)]
+    min_df_range.append(1)  # test documents with minimal df of 1(one) document
+    min_df_range.append(0.001)  # test documents with minimal df of 1(one) document
+    max_df_range = [x / 10 for x in range(2, 12, 2)]
+    max_df_range.append(0.1)
+    print('min_df:', min_df_range)
+    print('max_df:', max_df_range)
+    parameters = {'vect__min_df': min_df_range,  # test 0.001, 0.002, ... , 0.01
+                  'vect__max_df': max_df_range  # test 0.1, 0.2, 0.4, 0.6, ... , 1.0
                   }
     gs = GridSearchCV(pipeline, parameters, n_jobs=10)
     gs = gs.fit(raw_data_nlt_90, targets_nlt_90)
     gs_winner = gs.best_estimator_
+    for score in gs.grid_scores_:
+        print(score)
     print('done.')
 
     print('--- GridSearch WINNER ---')
@@ -179,12 +188,10 @@ def e3():
 
 def e4():
     """
-        E4 - TF/IDF BagOfWords without long-tail
-        Made additional changes in preproc, see printed config
-        Full text gets tokenized and transformed into a tf/idf weighted term-document-matrix.
-        Dataset without long tail
-        """
+        E4 - Character N-GRAMS
+    """
     print('========== e4: TF/IDF BOW WITHOUT LONG-TAIL CLEANED TWEET 1 BEGIN ==========')
+    # TODO CHOOSE TF/IDF VS. BINARY
     # preproc_text = tp.TextProcessor(blind_urls=False, remove_urls=True, remove_user_mentions=True,
     #                                 remove_hashtags=True,
     #                                 transform_lowercase=True, expand_urls=False)
@@ -239,8 +246,8 @@ def e5():
 
 
 """Run experiments"""
-e1()
-e2()
+# e1()
+# e2()
 e3()
 # e4()
 # e5()
