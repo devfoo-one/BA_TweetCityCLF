@@ -5,6 +5,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import chi2
 from sklearn import metrics, cross_validation
+from sklearn.grid_search import GridSearchCV
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import f1_score
 from sklearn.metrics import precision_score
@@ -25,33 +26,6 @@ dataset = Dataset(dataset=dataset_path)
 """ Initialise default tokenizer """
 tok = Tokenize.TweetTokenizer()
 
-"""
-    Split data into train, test and validation
-     ----------------------------------------------------------
-    |               70% TRAIN            |      30% TEST       |
-     ----------------------------------------------------------
-"""
-PERCENT_TRAIN = 0.7
-PERCENT_TEST = 0.3
-
-raw_train_data, train_targets = dataset.getData(n=len(dataset) * PERCENT_TRAIN,
-                                                cut_long_tail=False)
-raw_train_data_nlt, train_targets_nlt = dataset.getData(n=len(dataset) * PERCENT_TRAIN,
-                                                        cut_long_tail=True)
-
-raw_test_data, test_targets = dataset.getData(offset=len(dataset) * PERCENT_TRAIN,
-                                              n=len(dataset) * PERCENT_TEST,
-                                              cut_long_tail=False)
-raw_test_data_nlt, test_targets_nlt = dataset.getData(offset=len(dataset) * PERCENT_TRAIN,
-                                                      n=len(dataset) * PERCENT_TEST,
-                                                      cut_long_tail=True)
-
-print('SAMPLES = {}, TRAIN = {} ({:.2%}), TEST = {} ({:.2%}) (EXCEPT FOR CV CASES)'.format(len(dataset),
-                                                                                           len(raw_train_data),
-                                                                                           PERCENT_TRAIN,
-                                                                                           len(raw_test_data),
-                                                                                           PERCENT_TEST))
-
 
 def e1():
     """
@@ -60,6 +34,23 @@ def e1():
     Dataset with long tail
     """
     print('========== e1: BINARY BOW WITH LONG TAIL BEGIN ==========')
+    PERCENT_TRAIN = 0.7
+    PERCENT_TEST = 0.3
+    raw_train_data, train_targets = dataset.getData(n=len(dataset) * PERCENT_TRAIN,
+                                                    cut_long_tail=False)
+    raw_train_data_nlt, train_targets_nlt = dataset.getData(n=len(dataset) * PERCENT_TRAIN,
+                                                            cut_long_tail=True)
+    raw_test_data, test_targets = dataset.getData(offset=len(dataset) * PERCENT_TRAIN,
+                                                  n=len(dataset) * PERCENT_TEST,
+                                                  cut_long_tail=False)
+    raw_test_data_nlt, test_targets_nlt = dataset.getData(offset=len(dataset) * PERCENT_TRAIN,
+                                                          n=len(dataset) * PERCENT_TEST,
+                                                          cut_long_tail=True)
+    print('SAMPLES = {}, TRAIN = {} ({:.2%}), TEST = {} ({:.2%})'.format(len(dataset),
+                                                                         len(raw_train_data),
+                                                                         PERCENT_TRAIN,
+                                                                         len(raw_test_data),
+                                                                         PERCENT_TEST))
     preproc_text = tp.TextProcessor(blind_urls=False, remove_urls=False, remove_user_mentions=False,
                                     remove_hashtags=False,
                                     transform_lowercase=False, expand_urls=False)
@@ -117,6 +108,10 @@ def e2():
                                     transform_lowercase=False, expand_urls=False)
     print('** preproc config:', preproc_text, '**')
 
+    raw_data_nlt_90, targets_nlt_90 = dataset.getData(cut_long_tail=True)
+    dataset_50percent = Dataset(dataset_path, long_tail_cutoff=0.5)
+    raw_data_nlt_50, targets_nlt_50 = dataset_50percent.getData(cut_long_tail=True)
+
     """ Initialise PrintScorer for cross-validation"""
     scorer = CrossValidation.PrintingScorer()
 
@@ -125,12 +120,10 @@ def e2():
         [('vect', CountVectorizer(preprocessor=preproc_text, tokenizer=tok, lowercase=False, binary=True)),
          ('clf', MultinomialNB()),
          ])
-    cross_validation.cross_val_score(pipeline, raw_train_data_nlt, train_targets_nlt, cv=5, n_jobs=5, scoring=scorer)
+    cross_validation.cross_val_score(pipeline, raw_data_nlt_90, targets_nlt_90, cv=5, n_jobs=5, scoring=scorer)
     print('done.')
 
-    dataset_50percent = Dataset(dataset_path, long_tail_cutoff=0.5)
     print('Cross Validation with 50% long-tail-cutoff...', end='', flush=True)
-    raw_data_nlt_50, targets_nlt_50 = dataset_50percent.getData(cut_long_tail=True)
     cross_validation.cross_val_score(pipeline, raw_data_nlt_50, targets_nlt_50, cv=5, n_jobs=5, scoring=scorer)
     print('done.')
     print('--- CLASSIFICATION REPORT FOR LONG-TAIL-CUTOFF 50% CLASSES ---')
@@ -154,15 +147,32 @@ def e3():
                                     transform_lowercase=False, expand_urls=False)
     print('** preproc config:', preproc_text, '**')
 
+    raw_data_nlt_90, targets_nlt_90 = dataset.getData(cut_long_tail=True)
+
+    pipeline = Pipeline(
+        [('vect', TfidfVectorizer(preprocessor=preproc_text, tokenizer=tok, lowercase=False, use_idf=True)),
+         ('clf', MultinomialNB()),
+         ])
+
+    print('Grid Search...', end='', flush=True)
+    # http://stackoverflow.com/questions/27697766/understanding-min-df-and-max-df-in-scikit-countvectorizer
+    parameters = {'vect__min_df': [x / 1000 for x in range(1, 11, 1)],  # test 0.001, 0.002, ... , 0.01
+                  'vect__max_df': [x / 10 for x in range(1, 11, 1)]  # test 0.0, 0.1, ... , 1.0
+                  }
+    gs = GridSearchCV(pipeline, parameters, n_jobs=10)
+    gs = gs.fit(raw_data_nlt_90, targets_nlt_90)
+    gs_winner = gs.best_estimator_
+    print('done.')
+
+    print('--- GridSearch WINNER ---')
+    print(gs_winner)
+    print('-------------------------')
+
     """ Initialise PrintScorer for cross-validation"""
     scorer = CrossValidation.PrintingScorer()
 
     print('Cross Validation...', end='', flush=True)
-    pipeline = Pipeline(
-        [('vect', TfidfVectorizer(preprocessor=preproc_text, tokenizer=tok, lowercase=False, use_idf=True, )),
-         ('clf', MultinomialNB()),
-         ])
-    cross_validation.cross_val_score(pipeline, raw_train_data_nlt, train_targets_nlt, cv=5, n_jobs=5, scoring=scorer)
+    cross_validation.cross_val_score(gs_winner, raw_data_nlt_90, targets_nlt_90, cv=5, n_jobs=5, scoring=scorer)
     print('done.')
     print('========== e3: TF/IDF BOW WITHOUT LONG-TAIL END ==========')
 
@@ -175,25 +185,25 @@ def e4():
         Dataset without long tail
         """
     print('========== e4: TF/IDF BOW WITHOUT LONG-TAIL CLEANED TWEET 1 BEGIN ==========')
-    preproc_text = tp.TextProcessor(blind_urls=False, remove_urls=True, remove_user_mentions=True,
-                                    remove_hashtags=True,
-                                    transform_lowercase=True, expand_urls=False)
-    print('** preproc config:', preproc_text, '**')
-    print('Training classifier...', end='', flush=True)
-    pipeline = Pipeline(
-        [('vect', TfidfVectorizer(preprocessor=preproc_text, tokenizer=tok, lowercase=False)),
-         ('clf', MultinomialNB()),
-         ])
-    pipeline.fit(raw_train_data_nlt, train_targets_nlt)
-    print('done.')
-    print('Predicting test data...', end='', flush=True)
-    predicted = pipeline.predict(raw_test_data_nlt)
-    print('done.')
-    print('--- FULL CLASSIFICATION REPORT ---')
-    labels = list(set(test_targets_nlt))  # take only labels that have support
-    target_names = [dataset.getTargetName(x) for x in labels]
-    print(metrics.classification_report(test_targets_nlt, predicted, labels=labels, target_names=target_names,
-                                        digits=4))
+    # preproc_text = tp.TextProcessor(blind_urls=False, remove_urls=True, remove_user_mentions=True,
+    #                                 remove_hashtags=True,
+    #                                 transform_lowercase=True, expand_urls=False)
+    # print('** preproc config:', preproc_text, '**')
+    # print('Training classifier...', end='', flush=True)
+    # pipeline = Pipeline(
+    #     [('vect', TfidfVectorizer(preprocessor=preproc_text, tokenizer=tok, lowercase=False)),
+    #      ('clf', MultinomialNB()),
+    #      ])
+    # pipeline.fit(raw_train_data_nlt, train_targets_nlt)
+    # print('done.')
+    # print('Predicting test data...', end='', flush=True)
+    # predicted = pipeline.predict(raw_test_data_nlt)
+    # print('done.')
+    # print('--- FULL CLASSIFICATION REPORT ---')
+    # labels = list(set(test_targets_nlt))  # take only labels that have support
+    # target_names = [dataset.getTargetName(x) for x in labels]
+    # print(metrics.classification_report(test_targets_nlt, predicted, labels=labels, target_names=target_names,
+    #                                     digits=4))
     print('========== e4: TF/IDF BOW WITHOUT LONG-TAIL CLEANED TWEET 1 END ==========')
 
 
@@ -205,32 +215,32 @@ def e5():
         Dataset without long tail
         """
     print('========== e5: CHARACTER N GRAMS (1,3) WITHOUT LONG-TAIL EXPANDED URLS ==========')
-    preproc_text = tp.TextProcessor(blind_urls=False, remove_urls=False, remove_user_mentions=True,
-                                    remove_hashtags=False,
-                                    transform_lowercase=True, expand_urls=True)
-    print('** preproc config:', preproc_text, '**')
-    print('Training classifier...', end='', flush=True)
-    pipeline = Pipeline(
-        [('vect', CountVectorizer(preprocessor=preproc_text, analyzer='char', ngram_range=(1, 3))),
-         ('clf', MultinomialNB()),
-         ])
-    pipeline.fit(raw_train_data_nlt, train_targets_nlt)
-    print('done.')
-    print('Predicting test data...', end='', flush=True)
-    predicted = pipeline.predict(raw_test_data_nlt)
-    print('done.')
-    print('--- FULL CLASSIFICATION REPORT ---')
-    labels = list(set(test_targets_nlt))  # take only labels that have support
-    target_names = [dataset.getTargetName(x) for x in labels]
-    print(metrics.classification_report(test_targets_nlt, predicted, labels=labels, target_names=target_names,
-                                        digits=4))
+    # preproc_text = tp.TextProcessor(blind_urls=False, remove_urls=False, remove_user_mentions=True,
+    #                                 remove_hashtags=False,
+    #                                 transform_lowercase=True, expand_urls=True)
+    # print('** preproc config:', preproc_text, '**')
+    # print('Training classifier...', end='', flush=True)
+    # pipeline = Pipeline(
+    #     [('vect', CountVectorizer(preprocessor=preproc_text, analyzer='char', ngram_range=(1, 3))),
+    #      ('clf', MultinomialNB()),
+    #      ])
+    # pipeline.fit(raw_train_data_nlt, train_targets_nlt)
+    # print('done.')
+    # print('Predicting test data...', end='', flush=True)
+    # predicted = pipeline.predict(raw_test_data_nlt)
+    # print('done.')
+    # print('--- FULL CLASSIFICATION REPORT ---')
+    # labels = list(set(test_targets_nlt))  # take only labels that have support
+    # target_names = [dataset.getTargetName(x) for x in labels]
+    # print(metrics.classification_report(test_targets_nlt, predicted, labels=labels, target_names=target_names,
+    #                                     digits=4))
 
     print('========== e5: CHARACTER N GRAMS (1,3) WITHOUT LONG-TAIL EXPANDED URLS END ==========')
 
 
 """Run experiments"""
 e1()
-# e2()
-# e3()
+e2()
+e3()
 # e4()
 # e5()
