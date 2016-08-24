@@ -4,13 +4,18 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import chi2
-from sklearn import metrics
+from sklearn import metrics, cross_validation
+from sklearn.metrics import accuracy_score
+from sklearn.metrics import f1_score
+from sklearn.metrics import precision_score
+from sklearn.metrics import recall_score
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.pipeline import Pipeline
 
 from Dataset import Dataset
 from Utils.preprocessing import preproc_text as tp
 from Utils.tokenization import Tokenize
+from Utils.validation import CrossValidation
 
 dataset_path = sys.argv[1]
 
@@ -20,15 +25,18 @@ dataset = Dataset(dataset=dataset_path)
 """ Initialise default tokenizer """
 tok = Tokenize.TweetTokenizer()
 
+""" Initialise PrintScorer for cross-validation"""
+scorer = CrossValidation.PrintingScorer()
+
+
 """
     Split data into train, test and validation
      ----------------------------------------------------------
-    |               70% TRAIN            | 15% TEST | 15% VALI |
+    |               70% TRAIN            |      30% TEST       |
      ----------------------------------------------------------
 """
-PERCENT_TRAIN = 0.7
-PERCENT_TEST = 0.3
-# PERCENT_EVAL = 0.15
+PERCENT_TRAIN = 0.99
+PERCENT_TEST = 0.01
 
 raw_train_data, train_targets = dataset.getData(n=len(dataset) * PERCENT_TRAIN,
                                                 cut_long_tail=False)
@@ -42,8 +50,11 @@ raw_test_data_nlt, test_targets_nlt = dataset.getData(offset=len(dataset) * PERC
                                                       n=len(dataset) * PERCENT_TEST,
                                                       cut_long_tail=True)
 
-print('SAMPLES = {}, TRAIN = {} ({:.2%}), TEST = {} ({:.2%})'.format(len(dataset), len(raw_train_data), PERCENT_TRAIN,
-                                                               len(raw_test_data), PERCENT_TEST))
+print('SAMPLES = {}, TRAIN = {} ({:.2%}), TEST = {} ({:.2%}) (EXCEPT FOR CV CASES)'.format(len(dataset),
+                                                                                           len(raw_train_data),
+                                                                                           PERCENT_TRAIN,
+                                                                                           len(raw_test_data),
+                                                                                           PERCENT_TEST))
 
 
 def e1():
@@ -78,20 +89,6 @@ def e1():
     print(metrics.classification_report(test_targets, predicted, labels=labels_longtail,
                                         target_names=target_names_longtail, digits=4))
 
-    # print('--- TOP 20 FEATURES BY CHI2 SELECTION---')
-    # ch2 = SelectKBest(chi2, k=20)
-    # vectorizer_e1 = CountVectorizer(preprocessor=e1_preproc_text, tokenizer=tok, lowercase=False, binary=True)
-    # tdm_e1 = vectorizer_e1.fit_transform(raw_train_data)
-    # feature_names = vectorizer_e1.get_feature_names()
-    # ch2.fit_transform(tdm_e1, train_targets)
-    # for i in ch2.get_support(indices=True):  # returns feature indices of original tdm
-    #     targets_for_feature = []
-    #     for doc, a in enumerate(tdm_e1.getcol(i)):  # get tdm col for feature i
-    #         if a != 0:  # check if feature is present in col
-    #             target = train_targets[doc]  # get target for document
-    #             targets_for_feature.append(target)
-    #     print("'", feature_names[i], "' ", [dataset.getTargetName(x) for x in targets_for_feature])
-
     print('========== e1: BINARY BOW END ==========')
 
 
@@ -106,21 +103,26 @@ def e2():
                                     remove_hashtags=False,
                                     transform_lowercase=False, expand_urls=False)
     print('** preproc config:', preproc_text, '**')
-    print('Training classifier...', end='', flush=True)
+
+    print('Cross Validation with 90% long-tail-cutoff...', end='', flush=True)
     pipeline = Pipeline(
         [('vect', CountVectorizer(preprocessor=preproc_text, tokenizer=tok, lowercase=False, binary=True)),
          ('clf', MultinomialNB()),
          ])
-    pipeline.fit(raw_train_data_nlt, train_targets_nlt)
+    cross_validation.cross_val_score(pipeline, raw_train_data_nlt, train_targets_nlt, cv=5, n_jobs=5, scoring=scorer)
     print('done.')
-    print('Predicting test data...', end='', flush=True)
-    predicted = pipeline.predict(raw_test_data_nlt)
+
+    print('Cross Validation with 50% long-tail-cutoff...', end='', flush=True)
+    dataset_50percent = Dataset(dataset_path, long_tail_cutoff=0.5)
+    raw_train_data_nlt_50, targets_nlt_50 = dataset_50percent.getData(cut_long_tail=True)
+    cross_validation.cross_val_score(pipeline, raw_train_data_nlt_50, targets_nlt_50, cv=5, n_jobs=5, scoring=scorer)
     print('done.')
-    print('--- FULL CLASSIFICATION REPORT ---')
-    labels = list(set(test_targets_nlt))  # take only labels that have support
+    print('--- CLASSIFICATION REPORT FOR LONG-TAIL-CUTOFF 50% CLASSES ---')
+    predicted = cross_validation.cross_val_predict(pipeline, raw_train_data_nlt_50, targets_nlt_50, cv=5, n_jobs=5)
+    labels = list(set(targets_nlt_50))  # take only labels that have support
     target_names = [dataset.getTargetName(x) for x in labels]
-    print(metrics.classification_report(test_targets_nlt, predicted, labels=labels, target_names=target_names,
-                                        digits=4))
+    print(metrics.classification_report(targets_nlt_50, predicted, labels=labels,
+                                        target_names=target_names, digits=4))
     print('========== e2: BINARY BOW WITHOUT LONG-TAIL END ==========')
 
 
@@ -212,7 +214,7 @@ def e5():
     print('** preproc config:', preproc_text, '**')
     print('Training classifier...', end='', flush=True)
     pipeline = Pipeline(
-        [('vect', CountVectorizer(preprocessor=preproc_text, analyzer='char', ngram_range=(1,3))),
+        [('vect', CountVectorizer(preprocessor=preproc_text, analyzer='char', ngram_range=(1, 3))),
          ('clf', MultinomialNB()),
          ])
     pipeline.fit(raw_train_data_nlt, train_targets_nlt)
