@@ -96,8 +96,8 @@ class Dataset:
                 continue  # Tweet has no lang or place.placetype. skipping.
         print('done.')
 
-        print("DATASET: Generating 'other' class for last {:.2%} (long tail) target classes... ".format(long_tail_cutoff), end='', flush=True)
-        """Cut last N% of targets and point it to class 'other', long_tail_cutoff percentage is given in constructor"""
+        print("DATASET: Generating 'other' classes after top {:.2%}  target classes (long tail)... ".format(long_tail_cutoff), end='', flush=True)
+        """Cut after N% of targets and point to class 'other', long_tail_cutoff percentage is given in constructor"""
 
         self.__targets_noLongTail__ = list(self.__targets__)
         self.__target_counter_noLongTail__ = dict(self.__target_counter__)
