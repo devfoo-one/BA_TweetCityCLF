@@ -75,6 +75,23 @@ def e1():
     predicted = pipeline.predict(raw_test_data)
 
     print('done.')
+
+    precision_micro = precision_score(test_targets, predicted, average='micro')
+    precision_macro = precision_score(test_targets, predicted, average='macro')
+    precision_weighted = precision_score(test_targets, predicted, average='weighted')
+    recall_micro = recall_score(test_targets, predicted, average='micro')
+    recall_macro = recall_score(test_targets, predicted, average='macro')
+    recall_weighted = recall_score(test_targets, predicted, average='weighted')
+    f1_micro = f1_score(test_targets, predicted, average='micro')
+    f1_macro = f1_score(test_targets, predicted, average='macro')
+    f1_weighted = f1_score(test_targets, predicted, average='weighted')
+    accuracy = accuracy_score(test_targets, predicted)
+    print('--- PrintingScorer ---')
+    print("Precision:\tmicro={}\tmacro={}\tweighted={}".format(precision_micro, precision_macro, precision_weighted))
+    print("Recall:\t\tmicro={}\tmacro={}\tweighted={}".format(recall_micro, recall_macro, recall_weighted))
+    print("F-Measure:\tmicro={}\tmacro={}\tweighted={}".format(f1_micro, f1_macro, f1_weighted))
+    print("Accuracy:\t{}".format(accuracy))
+
     print('--- FULL CLASSIFICATION REPORT WITH ALL CLASSES ---')
     labels = list(set(test_targets))  # take only labels that have support
     target_names = [dataset.getTargetName(x) for x in labels]
@@ -212,8 +229,8 @@ def e5():
 
 
 """Run experiments"""
-# e1()
+e1()
 # e2()
-e3()
+# e3()
 # e4()
 # e5()
