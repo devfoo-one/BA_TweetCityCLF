@@ -9,18 +9,25 @@ class TextProcessor:
     }
 
     def __init__(self, blind_urls=False, remove_urls=False, remove_user_mentions=False, remove_hashtags=False,
-                 transform_lowercase=True, expand_urls=True):
+                 transform_lowercase=True, expand_urls=True, only_hashtags=False):
         self.config['remove_urls'] = remove_urls
         self.config['remove_user_mentions'] = remove_user_mentions
         self.config['transform_lowercase'] = transform_lowercase
         self.config['remove_hashtags'] = remove_hashtags
+        self.config['only_hashtags'] = only_hashtags
         self.config['blind_urls'] = blind_urls
         self.config['expand_urls'] = expand_urls
 
     def digest(self, tweet):
         """Processes a tweet object (as given from the streaming api) and returns a string."""
         tweet_text = tweet['text']
-        # TODO ADD html.parser.HTMLParser().unescape(text)
+
+        """only hashtags"""
+        if self.config['only_hashtags']:
+            hashtags = []
+            for hashtag in tweet['entities']['hashtags']:
+                hashtags.append(hashtag['text'])
+            return ' '.join(hashtags)
 
         """remove URLs"""
         if self.config['remove_urls']:

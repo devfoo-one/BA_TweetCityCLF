@@ -15,6 +15,7 @@ from sklearn.pipeline import Pipeline
 
 from Dataset import Dataset
 from Utils.preprocessing import preproc_text as tp
+from Utils.preprocessing import preproc_meta as tm
 from Utils.tokenization import Tokenize
 from Utils.validation import CrossValidation
 
@@ -243,7 +244,7 @@ def e5():
          ])
     print(pipeline)
     print('Cross Validation with 90% long-tail-cutoff...', end='', flush=True)
-    cross_validation.cross_val_score(pipeline, raw_data_nlt_90, targets_nlt_90, cv=5, n_jobs=3, scoring=scorer)
+    cross_validation.cross_val_score(pipeline, raw_data_nlt_90, targets_nlt_90, cv=5, n_jobs=1, scoring=scorer)
     print('done.')
     print('========== e5: TOKEN-NGRAMS (1,3) WITHOUT LONG-TAIL BEGIN  END ==========')
 
@@ -256,10 +257,32 @@ def e6():
         Dataset without long tail
         """
     print('========== e6: CHARACTER N GRAMS (1,3) WITHOUT LONG-TAIL BEGIN ==========')
-    print('========== e5: CHARACTER N GRAMS (1,3) WITHOUT LONG-TAIL EXPANDED URLS END ==========')
+    print('========== e6: CHARACTER N GRAMS (1,3) WITHOUT LONG-TAIL END ==========')
+
 
 def e7():
-    pass
+    print('========== e7: PROFILE FIELD BOW WITHOUT LONG-TAIL BEGIN ==========')
+    preproc_meta = tm.MetaFeatureProcessor(extract_profile_location=True)
+    print('** preproc config:', preproc_meta, '**')
+
+    raw_data_nlt_90, targets_nlt_90 = dataset.getData(cut_long_tail=True)
+    dataset_50percent = Dataset(dataset_path, long_tail_cutoff=0.5)
+    raw_data_nlt_50, targets_nlt_50 = dataset_50percent.getData(cut_long_tail=True)
+
+    """ Initialise PrintScorer for cross-validation"""
+    scorer = CrossValidation.PrintingScorer()
+
+    print('Cross Validation with 90% long-tail-cutoff...', end='', flush=True)
+    pipeline = Pipeline(
+        [('vect', CountVectorizer(preprocessor=preproc_meta, tokenizer=tok, lowercase=False, binary=True)),
+         ('clf', MultinomialNB()),
+         ])
+    cross_validation.cross_val_score(pipeline, raw_data_nlt_90, targets_nlt_90, cv=5, n_jobs=5, scoring=scorer)
+    print('done.')
+
+    print('Cross Validation with 50% long-tail-cutoff...', end='', flush=True)
+    cross_validation.cross_val_score(pipeline, raw_data_nlt_50, targets_nlt_50, cv=5, n_jobs=5, scoring=scorer)
+    print('done.')
 
 
 """Run experiments"""
@@ -267,6 +290,6 @@ def e7():
 # e2()
 # e3()
 # e4()
-# e5()
+e5()
 # e6()
 # e7()
