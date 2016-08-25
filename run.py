@@ -210,13 +210,21 @@ def e4():
          ])
     cross_validation.cross_val_score(pipeline, raw_data_nlt_90, targets_nlt_90, cv=5, n_jobs=5, scoring=scorer)
     print('done.')
+
+    print('Cross Validation with 50% long-tail-cutoff...', end='', flush=True)
+    dataset_50percent = Dataset(dataset_path, long_tail_cutoff=0.5)
+    raw_data_nlt_50, targets_nlt_50 = dataset_50percent.getData(cut_long_tail=True)
+    cross_validation.cross_val_score(pipeline, raw_data_nlt_50, targets_nlt_50, cv=5, n_jobs=5, scoring=scorer)
+    print('done.')
+
     print('========== e4: BINARY BOW LOWERCASE WITHOUT LONG-TAIL BEGIN END ==========')
+
 
 def e5():
     """
         E5 - Character N-GRAMS
     """
-    print('========== e4: WORD-NGRAMS WITHOUT LONG-TAIL BEGIN ==========')
+    print('========== e4: WORD-NGRAMS (1,3) WITHOUT LONG-TAIL BEGIN ==========')
     preproc_text = tp.TextProcessor(blind_urls=False, remove_urls=False, remove_user_mentions=False,
                                     remove_hashtags=False,
                                     transform_lowercase=False, expand_urls=False)
@@ -236,7 +244,9 @@ def e5():
     print(pipeline)
     print('Cross Validation with 90% long-tail-cutoff...', end='', flush=True)
     pipeline = Pipeline(
-        [('vect', CountVectorizer(preprocessor=preproc_text, tokenizer=tok, lowercase=False, binary=True, analyzer='word', ngram_range=(1,3))),
+        [('vect',
+          CountVectorizer(preprocessor=preproc_text, tokenizer=tok, lowercase=False, binary=True, analyzer='word',
+                          ngram_range=(1, 3))),
          ('clf', MultinomialNB()),
          ])
     cross_validation.cross_val_score(pipeline, raw_data_nlt_90, targets_nlt_90, cv=5, n_jobs=5, scoring=scorer)
