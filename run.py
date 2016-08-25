@@ -188,14 +188,60 @@ def e3():
 
 def e4():
     """
-        E4 - Character N-GRAMS
+       E4 - Binary BagOfWords lowercase without long-tail
+       Full text gets tokenized, lowercased and transformed into a binary term-document-matrix.
+       Dataset without long tail
+       """
+    print('========== e4: BINARY BOW LOWERCASE WITHOUT LONG-TAIL BEGIN ==========')
+    preproc_text = tp.TextProcessor(blind_urls=False, remove_urls=False, remove_user_mentions=False,
+                                    remove_hashtags=False,
+                                    transform_lowercase=True, expand_urls=False)
+    print('** preproc config:', preproc_text, '**')
+
+    raw_data_nlt_90, targets_nlt_90 = dataset.getData(cut_long_tail=True)
+
+    """ Initialise PrintScorer for cross-validation"""
+    scorer = CrossValidation.PrintingScorer()
+
+    print('Cross Validation with 90% long-tail-cutoff...', end='', flush=True)
+    pipeline = Pipeline(
+        [('vect', CountVectorizer(preprocessor=preproc_text, tokenizer=tok, lowercase=True, binary=True)),
+         ('clf', MultinomialNB()),
+         ])
+    cross_validation.cross_val_score(pipeline, raw_data_nlt_90, targets_nlt_90, cv=5, n_jobs=5, scoring=scorer)
+    print('done.')
+    print('========== e4: BINARY BOW LOWERCASE WITHOUT LONG-TAIL BEGIN END ==========')
+
+def e5():
     """
-    print('========== e4: TF/IDF BOW WITHOUT LONG-TAIL CLEANED TWEET 1 BEGIN ==========')
-    # TODO CHOOSE TF/IDF VS. BINARY
-    # preproc_text = tp.TextProcessor(blind_urls=False, remove_urls=True, remove_user_mentions=True,
-    #                                 remove_hashtags=True,
-    #                                 transform_lowercase=True, expand_urls=False)
-    # print('** preproc config:', preproc_text, '**')
+        E5 - Character N-GRAMS
+    """
+    print('========== e4: WORD-NGRAMS WITHOUT LONG-TAIL BEGIN ==========')
+    preproc_text = tp.TextProcessor(blind_urls=False, remove_urls=False, remove_user_mentions=False,
+                                    remove_hashtags=False,
+                                    transform_lowercase=False, expand_urls=False)
+    print('** preproc config:', preproc_text, '**')
+
+    raw_data_nlt_90, targets_nlt_90 = dataset.getData(cut_long_tail=True)
+
+    """ Initialise PrintScorer for cross-validation"""
+    scorer = CrossValidation.PrintingScorer()
+
+    pipeline = Pipeline(
+        [('vect',
+          CountVectorizer(preprocessor=preproc_text, tokenizer=tok, lowercase=False, binary=True, analyzer='word',
+                          ngram_range=(1, 3))),
+         ('clf', MultinomialNB()),
+         ])
+    print(pipeline)
+    print('Cross Validation with 90% long-tail-cutoff...', end='', flush=True)
+    pipeline = Pipeline(
+        [('vect', CountVectorizer(preprocessor=preproc_text, tokenizer=tok, lowercase=False, binary=True, analyzer='word', ngram_range=(1,3))),
+         ('clf', MultinomialNB()),
+         ])
+    cross_validation.cross_val_score(pipeline, raw_data_nlt_90, targets_nlt_90, cv=5, n_jobs=5, scoring=scorer)
+    print('done.')
+
     # print('Training classifier...', end='', flush=True)
     # pipeline = Pipeline(
     #     [('vect', TfidfVectorizer(preprocessor=preproc_text, tokenizer=tok, lowercase=False)),
@@ -211,10 +257,10 @@ def e4():
     # target_names = [dataset.getTargetName(x) for x in labels]
     # print(metrics.classification_report(test_targets_nlt, predicted, labels=labels, target_names=target_names,
     #                                     digits=4))
-    print('========== e4: TF/IDF BOW WITHOUT LONG-TAIL CLEANED TWEET 1 END ==========')
+    print('========== e4: WORD-NGRAMS WITHOUT LONG-TAIL  END ==========')
 
 
-def e5():
+def e6():
     """
         E5 - Character N-Grams
         Made additional changes in preproc, see printed config
@@ -248,6 +294,6 @@ def e5():
 """Run experiments"""
 # e1()
 # e2()
-e3()
-# e4()
+# e3()
+e4()
 # e5()
