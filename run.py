@@ -224,6 +224,7 @@ def e4():
 def e5():
     """
         E5 - TOKEN N-GRAMS
+        Dataset without long tail
     """
     print('========== e5: TOKEN-NGRAMS (1,3) WITHOUT LONG-TAIL BEGIN ==========')
     preproc_text = tp.TextProcessor(blind_urls=False, remove_urls=False, remove_user_mentions=False,
@@ -246,43 +247,92 @@ def e5():
     print('Cross Validation with 90% long-tail-cutoff...', end='', flush=True)
     cross_validation.cross_val_score(pipeline, raw_data_nlt_90, targets_nlt_90, cv=5, n_jobs=1, scoring=scorer)
     print('done.')
-    print('========== e5: TOKEN-NGRAMS (1,3) WITHOUT LONG-TAIL BEGIN  END ==========')
+    print('========== e5: TOKEN-NGRAMS (1,3) WITHOUT LONG-TAIL END ==========')
 
 
-def e6():
+def e5_1():
     """
-        E5 - Character N-Grams
-        Made additional changes in preproc, see printed config
-        Full text gets tokenized and transformed into a tf/idf weighted term-document-matrix.
+        E5_1 - TOKEN N-GRAMS lowercase
         Dataset without long tail
-        """
-    print('========== e6: CHARACTER N GRAMS (1,3) WITHOUT LONG-TAIL BEGIN ==========')
-    print('========== e6: CHARACTER N GRAMS (1,3) WITHOUT LONG-TAIL END ==========')
-
-
-def e7():
-    print('========== e7: PROFILE FIELD BOW WITHOUT LONG-TAIL BEGIN ==========')
-    preproc_meta = tm.MetaFeatureProcessor(extract_profile_location=True)
-    print('** preproc config:', preproc_meta, '**')
+    """
+    print('========== e5_1: TOKEN-NGRAMS (1,3) LOWERCASE WITHOUT LONG-TAIL BEGIN ==========')
+    preproc_text = tp.TextProcessor(blind_urls=False, remove_urls=False, remove_user_mentions=False,
+                                    remove_hashtags=False,
+                                    transform_lowercase=True, expand_urls=False)
+    print('** preproc config:', preproc_text, '**')
 
     raw_data_nlt_90, targets_nlt_90 = dataset.getData(cut_long_tail=True)
-    dataset_50percent = Dataset(dataset_path, long_tail_cutoff=0.5)
-    raw_data_nlt_50, targets_nlt_50 = dataset_50percent.getData(cut_long_tail=True)
 
     """ Initialise PrintScorer for cross-validation"""
     scorer = CrossValidation.PrintingScorer()
 
-    print('Cross Validation with 90% long-tail-cutoff...', end='', flush=True)
     pipeline = Pipeline(
-        [('vect', CountVectorizer(preprocessor=preproc_meta, tokenizer=tok, lowercase=False, binary=True)),
+        [('vect',
+          CountVectorizer(preprocessor=preproc_text, tokenizer=tok, lowercase=True, binary=True, analyzer='word',
+                          ngram_range=(1, 3))),
          ('clf', MultinomialNB()),
          ])
-    cross_validation.cross_val_score(pipeline, raw_data_nlt_90, targets_nlt_90, cv=5, n_jobs=5, scoring=scorer)
+    print(pipeline)
+    print('Cross Validation with 90% long-tail-cutoff...', end='', flush=True)
+    cross_validation.cross_val_score(pipeline, raw_data_nlt_90, targets_nlt_90, cv=5, n_jobs=1, scoring=scorer)
+    print('done.')
+    print('========== e5_1: TOKEN-NGRAMS (1,3) LOWERCASE WITHOUT LONG-TAIL END ==========')
+
+
+def e6():
+    """
+        E6 - Char N-Grams
+        Dataset without long tail
+    """
+    print('========== e6: CHARACTER N GRAMS (2,4) WITHOUT LONG-TAIL BEGIN ==========')
+    preproc_text = tp.TextProcessor(blind_urls=False, remove_urls=False, remove_user_mentions=False,
+                                    remove_hashtags=False,
+                                    transform_lowercase=False, expand_urls=False)
+    print('** preproc config:', preproc_text, '**')
+
+    raw_data_nlt_90, targets_nlt_90 = dataset.getData(cut_long_tail=True)
+
+    """ Initialise PrintScorer for cross-validation"""
+    scorer = CrossValidation.PrintingScorer()
+
+    pipeline = Pipeline(
+        [('vect',
+          CountVectorizer(preprocessor=preproc_text, tokenizer=tok, lowercase=False, binary=True, analyzer='char',
+                          ngram_range=(2, 4))),
+         ('clf', MultinomialNB()),
+         ])
+    print(pipeline)
+    print('Cross Validation with 90% long-tail-cutoff...', end='', flush=True)
+    cross_validation.cross_val_score(pipeline, raw_data_nlt_90, targets_nlt_90, cv=5, n_jobs=1, scoring=scorer)
     print('done.')
 
-    print('Cross Validation with 50% long-tail-cutoff...', end='', flush=True)
-    cross_validation.cross_val_score(pipeline, raw_data_nlt_50, targets_nlt_50, cv=5, n_jobs=5, scoring=scorer)
+    print('========== e6: CHARACTER N GRAMS (2,4) WITHOUT LONG-TAIL END ==========')
+
+
+def e7():
+    print('========== e7: PROFILE FIELD BOW WITHOUT LONG-TAIL BEGIN ==========')
+    # preproc_meta = tm.MetaFeatureProcessor(extract_profile_location=True)
+    # print('** preproc config:', preproc_meta, '**')
+    #
+    # raw_data_nlt_90, targets_nlt_90 = dataset.getData(cut_long_tail=True)
+    # dataset_50percent = Dataset(dataset_path, long_tail_cutoff=0.5)
+    # raw_data_nlt_50, targets_nlt_50 = dataset_50percent.getData(cut_long_tail=True)
+    #
+    # """ Initialise PrintScorer for cross-validation"""
+    # scorer = CrossValidation.PrintingScorer()
+    #
+    # print('Cross Validation with 90% long-tail-cutoff...', end='', flush=True)
+    # pipeline = Pipeline(
+    #     [('vect', CountVectorizer(preprocessor=preproc_meta, tokenizer=tok, lowercase=False, binary=True)),
+    #      ('clf', MultinomialNB()),
+    #      ])
+    # cross_validation.cross_val_score(pipeline, raw_data_nlt_90, targets_nlt_90, cv=5, n_jobs=5, scoring=scorer)
+    # print('done.')
+    #
+    # print('Cross Validation with 50% long-tail-cutoff...', end='', flush=True)
+    # cross_validation.cross_val_score(pipeline, raw_data_nlt_50, targets_nlt_50, cv=5, n_jobs=5, scoring=scorer)
     print('done.')
+    print('========== e7: PROFILE FIELD BOW WITHOUT LONG-TAIL END ==========')
 
 
 """Run experiments"""
@@ -290,6 +340,7 @@ def e7():
 # e2()
 # e3()
 # e4()
-e5()
+# e5()
+e5_1()
 # e6()
 # e7()
