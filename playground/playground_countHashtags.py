@@ -1,4 +1,5 @@
 import json
+import pickle
 
 hashtag_collection = {}
 hashtag_count_yes = 0
@@ -18,7 +19,8 @@ with open('../../data/Germany_filtered_shuffled.json') as dataset:
             key_errors += 1
             continue
 
-        has_hashtag = len(hashtags) == 0
+        has_hashtag = (len(hashtags) != 0)
+
         if has_hashtag:
             hashtag_count_yes += 1
             for tag in hashtags:
@@ -26,7 +28,6 @@ with open('../../data/Germany_filtered_shuffled.json') as dataset:
                 if hashtag_text not in hashtag_collection.keys():
                     hashtag_collection[hashtag_text] = 0
                 hashtag_collection[hashtag_text] += 1
-
         if not has_hashtag:
             hashtag_count_no += 1
 
@@ -41,4 +42,15 @@ with open('../../data/Germany_filtered_shuffled.json') as dataset:
                 (hashtag_count_yes + hashtag_count_no + key_errors) == n,
                 len(hashtag_collection.keys())
             ))
-            print(hashtag_collection)
+
+
+print('n = {}, tweets with hashtag = {}, tweets without hashtag = {}, key_errors = {}, sum check = {}, unique hashtags = {}'.format(
+                n,
+                hashtag_count_yes,
+                hashtag_count_no,
+                key_errors,
+                (hashtag_count_yes + hashtag_count_no + key_errors) == n,
+                len(hashtag_collection.keys())
+            ))
+with open('hashtags_de_filtered.pickle', mode='wb') as hashtags_f:
+    pickle.dump(hashtag_collection, hashtags_f)
