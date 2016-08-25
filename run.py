@@ -222,9 +222,9 @@ def e4():
 
 def e5():
     """
-        E5 - Character N-GRAMS
+        E5 - TOKEN N-GRAMS
     """
-    print('========== e4: WORD-NGRAMS (1,3) WITHOUT LONG-TAIL BEGIN ==========')
+    print('========== e5: TOKEN-NGRAMS (1,3) WITHOUT LONG-TAIL BEGIN ==========')
     preproc_text = tp.TextProcessor(blind_urls=False, remove_urls=False, remove_user_mentions=False,
                                     remove_hashtags=False,
                                     transform_lowercase=False, expand_urls=False)
@@ -243,31 +243,9 @@ def e5():
          ])
     print(pipeline)
     print('Cross Validation with 90% long-tail-cutoff...', end='', flush=True)
-    pipeline = Pipeline(
-        [('vect',
-          CountVectorizer(preprocessor=preproc_text, tokenizer=tok, lowercase=False, binary=True, analyzer='word',
-                          ngram_range=(1, 3))),
-         ('clf', MultinomialNB()),
-         ])
-    cross_validation.cross_val_score(pipeline, raw_data_nlt_90, targets_nlt_90, cv=5, n_jobs=5, scoring=scorer)
+    cross_validation.cross_val_score(pipeline, raw_data_nlt_90, targets_nlt_90, cv=5, n_jobs=3, scoring=scorer)
     print('done.')
-
-    # print('Training classifier...', end='', flush=True)
-    # pipeline = Pipeline(
-    #     [('vect', TfidfVectorizer(preprocessor=preproc_text, tokenizer=tok, lowercase=False)),
-    #      ('clf', MultinomialNB()),
-    #      ])
-    # pipeline.fit(raw_train_data_nlt, train_targets_nlt)
-    # print('done.')
-    # print('Predicting test data...', end='', flush=True)
-    # predicted = pipeline.predict(raw_test_data_nlt)
-    # print('done.')
-    # print('--- FULL CLASSIFICATION REPORT ---')
-    # labels = list(set(test_targets_nlt))  # take only labels that have support
-    # target_names = [dataset.getTargetName(x) for x in labels]
-    # print(metrics.classification_report(test_targets_nlt, predicted, labels=labels, target_names=target_names,
-    #                                     digits=4))
-    print('========== e4: WORD-NGRAMS WITHOUT LONG-TAIL  END ==========')
+    print('========== e5: TOKEN-NGRAMS (1,3) WITHOUT LONG-TAIL BEGIN  END ==========')
 
 
 def e6():
@@ -277,33 +255,18 @@ def e6():
         Full text gets tokenized and transformed into a tf/idf weighted term-document-matrix.
         Dataset without long tail
         """
-    print('========== e5: CHARACTER N GRAMS (1,3) WITHOUT LONG-TAIL EXPANDED URLS ==========')
-    # preproc_text = tp.TextProcessor(blind_urls=False, remove_urls=False, remove_user_mentions=True,
-    #                                 remove_hashtags=False,
-    #                                 transform_lowercase=True, expand_urls=True)
-    # print('** preproc config:', preproc_text, '**')
-    # print('Training classifier...', end='', flush=True)
-    # pipeline = Pipeline(
-    #     [('vect', CountVectorizer(preprocessor=preproc_text, analyzer='char', ngram_range=(1, 3))),
-    #      ('clf', MultinomialNB()),
-    #      ])
-    # pipeline.fit(raw_train_data_nlt, train_targets_nlt)
-    # print('done.')
-    # print('Predicting test data...', end='', flush=True)
-    # predicted = pipeline.predict(raw_test_data_nlt)
-    # print('done.')
-    # print('--- FULL CLASSIFICATION REPORT ---')
-    # labels = list(set(test_targets_nlt))  # take only labels that have support
-    # target_names = [dataset.getTargetName(x) for x in labels]
-    # print(metrics.classification_report(test_targets_nlt, predicted, labels=labels, target_names=target_names,
-    #                                     digits=4))
-
+    print('========== e6: CHARACTER N GRAMS (1,3) WITHOUT LONG-TAIL BEGIN ==========')
     print('========== e5: CHARACTER N GRAMS (1,3) WITHOUT LONG-TAIL EXPANDED URLS END ==========')
+
+def e7():
+    pass
 
 
 """Run experiments"""
 # e1()
 # e2()
 # e3()
-e4()
+# e4()
 # e5()
+# e6()
+# e7()
