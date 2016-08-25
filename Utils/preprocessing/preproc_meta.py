@@ -1,4 +1,4 @@
-class ArbitraryFeatureProcessor:
+class MetaFeatureProcessor:
     config = {
         'extract_profile_location': False,
     }
@@ -8,13 +8,16 @@ class ArbitraryFeatureProcessor:
 
     def digest(self, tweet):
         features = []
-        """Processes a tweet object (as given from the streaming api) and returns a string."""  # TODO UPDATE ME
-        tweet_text = tweet['text']
 
-        """remove URLs"""
+        """extract user location"""
         if self.config['extract_profile_location']:
-            # do something
-            pass
+            try:
+                user_location = tweet['user']['location']
+            except KeyError:
+                user_location = None
+            if user_location is None or len(user_location) == 0:
+                user_location = ''
+            features.append(user_location)
 
         return ' '.join(features)
 
