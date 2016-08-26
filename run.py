@@ -423,6 +423,35 @@ def e7_3():
     print('========== e7_3: TOKEN-NGRAMS (1,3) WITHOUT LONG-TAIL NO HASHTAGS END ==========')
 
 
+def e8():
+    """
+        E8 - TOKEN-NGRAMS ON USER PROFILE LOCATION
+        Dataset without long tail
+    """
+    print('========== e8: TOKEN-NGRAMS (1,3) TOKEN-NGRAMS ON USER PROFILE LOCATION WITHOUT LONG-TAIL BEGIN ==========')
+    # preproc_text = tp.TextProcessor(blind_urls=False, remove_urls=True, remove_user_mentions=False,
+    #                                 remove_hashtags=True,
+    #                                 transform_lowercase=False, expand_urls=False)
+    preproc_meta = tm.MetaFeatureProcessor(extract_profile_location=True)
+    print('** preproc config:', preproc_meta, '**')
+
+    raw_data_nlt_90, targets_nlt_90 = dataset.getData(cut_long_tail=True)
+
+    """ Initialise PrintScorer for cross-validation"""
+    scorer = CrossValidation.PrintingScorer()
+
+    pipeline = Pipeline(
+        [('vect',
+          CountVectorizer(preprocessor=preproc_meta, tokenizer=tok, lowercase=False, binary=True, analyzer='word',
+                          ngram_range=(1, 3))),
+         ('clf', MultinomialNB()),
+         ])
+    print('Cross Validation with 90% long-tail-cutoff...')
+    cross_validation.cross_val_score(pipeline, raw_data_nlt_90, targets_nlt_90, cv=5, n_jobs=1, scoring=scorer)
+    print('done.')
+    print('========== e8: TOKEN-NGRAMS (1,3) TOKEN-NGRAMS ON USER PROFILE LOCATION WITHOUT LONG-TAIL END ==========')
+
+
 """Run experiments"""
 # e1()
 # e2()
@@ -432,6 +461,7 @@ def e7_3():
 # e5_1()
 # e6()
 # e6_l()
-e7_1()
-e7_2()
-e7_3()
+# e7_1()
+# e7_2()
+# e7_3()
+e8()
