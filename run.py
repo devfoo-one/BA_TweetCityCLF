@@ -2,8 +2,6 @@ import sys
 
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.feature_selection import SelectKBest
-from sklearn.feature_selection import chi2
 from sklearn import metrics, cross_validation
 from sklearn.grid_search import GridSearchCV
 from sklearn.metrics import accuracy_score
@@ -221,12 +219,12 @@ def e4():
     print('========== e4: BINARY BOW LOWERCASE WITHOUT LONG-TAIL BEGIN END ==========')
 
 
-def e5():
+def e5_1():
     """
-        E5 - TOKEN N-GRAMS
+        E5_1 - TOKEN N-GRAMS
         Dataset without long tail
     """
-    print('========== e5: TOKEN-NGRAMS (1,3) WITHOUT LONG-TAIL BEGIN ==========')
+    print('========== e5_1: TOKEN-NGRAMS (1,3) WITHOUT LONG-TAIL BEGIN ==========')
     preproc_text = tp.TextProcessor(blind_urls=False, remove_urls=False, remove_user_mentions=False,
                                     remove_hashtags=False,
                                     transform_lowercase=False, expand_urls=False)
@@ -247,15 +245,15 @@ def e5():
     print('Cross Validation with 90% long-tail-cutoff...', end='', flush=True)
     cross_validation.cross_val_score(pipeline, raw_data_nlt_90, targets_nlt_90, cv=5, n_jobs=1, scoring=scorer)
     print('done.')
-    print('========== e5: TOKEN-NGRAMS (1,3) WITHOUT LONG-TAIL END ==========')
+    print('========== e5_1: TOKEN-NGRAMS (1,3) WITHOUT LONG-TAIL END ==========')
 
 
-def e5_1():
+def e5_2():
     """
-        E5_1 - TOKEN N-GRAMS lowercase
+        E5_2 - TOKEN N-GRAMS lowercase
         Dataset without long tail
     """
-    print('========== e5_1: TOKEN-NGRAMS (1,3) LOWERCASE WITHOUT LONG-TAIL BEGIN ==========')
+    print('========== e5_2: TOKEN-NGRAMS (1,3) LOWERCASE WITHOUT LONG-TAIL BEGIN ==========')
     preproc_text = tp.TextProcessor(blind_urls=False, remove_urls=False, remove_user_mentions=False,
                                     remove_hashtags=False,
                                     transform_lowercase=True, expand_urls=False)
@@ -276,6 +274,46 @@ def e5_1():
     print('Cross Validation with 90% long-tail-cutoff...', end='', flush=True)
     cross_validation.cross_val_score(pipeline, raw_data_nlt_90, targets_nlt_90, cv=5, n_jobs=1, scoring=scorer)
     print('done.')
+    print('========== e5_2: TOKEN-NGRAMS (1,3) LOWERCASE WITHOUT LONG-TAIL END ==========')
+
+
+def e5_1_storePrediction():
+    """
+        E5_1 - TOKEN N-GRAMS lowercase
+        Dataset without long tail
+    """
+    print('========== e5_1: TOKEN-NGRAMS (1,3) LOWERCASE WITHOUT LONG-TAIL BEGIN ==========')
+    export = {
+        'target_names' : {},
+        'predicted' : [],
+        'truth' : []
+    }
+    preproc_text = tp.TextProcessor(blind_urls=False, remove_urls=False, remove_user_mentions=False,
+                                    remove_hashtags=False,
+                                    transform_lowercase=False, expand_urls=False)
+    print('** preproc config:', preproc_text, '**')
+
+    raw_data_nlt_90, targets_nlt_90 = dataset.getData(cut_long_tail=True)
+
+    pipeline = Pipeline(
+        [('vect',
+          CountVectorizer(preprocessor=preproc_text, tokenizer=tok, lowercase=False, binary=True, analyzer='word',
+                          ngram_range=(1, 3))),
+         ('clf', MultinomialNB()),
+         ])
+    print(pipeline)
+    print('Predicting...')
+    export['predicted'] = cross_validation.cross_val_predict(pipeline, raw_data_nlt_90, targets_nlt_90, cv=5, n_jobs=1)
+    export['truth'] = targets_nlt_90
+    export['predicted'] = list(export['predicted'])
+    for target_id in set(targets_nlt_90):
+        export['target_names'][target_id] = dataset.getTargetName(target_id)
+    print('done.')
+
+    import pickle
+    with open('../data/e51predictions.pickle', mode='wb') as export_f:
+        pickle.dump(export, export_f)
+
     print('========== e5_1: TOKEN-NGRAMS (1,3) LOWERCASE WITHOUT LONG-TAIL END ==========')
 
 
@@ -459,9 +497,10 @@ def e8():
 # e4()
 # e5()
 # e5_1()
+e5_1_storePrediction()
 # e6()
 # e6_l()
 # e7_1()
 # e7_2()
 # e7_3()
-e8()
+# e8()
