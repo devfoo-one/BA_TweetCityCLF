@@ -284,9 +284,9 @@ def e5_1_storePrediction():
     """
     print('========== e5_1: TOKEN-NGRAMS (1,3) LOWERCASE WITHOUT LONG-TAIL BEGIN ==========')
     export = {
-        'target_names' : {},
-        'predicted' : [],
-        'truth' : []
+        'target_names': {},
+        'predicted': [],
+        'truth': []
     }
     preproc_text = tp.TextProcessor(blind_urls=False, remove_urls=False, remove_user_mentions=False,
                                     remove_hashtags=False,
@@ -438,9 +438,9 @@ def e7_3():
             E5 - TOKEN N-GRAMS
             Dataset without long tail
         """
-    print('========== e7_3: TOKEN-NGRAMS (1,3) WITHOUT LONG-TAIL NO HASHTAGS BEGIN ==========')
-    preproc_text = tp.TextProcessor(blind_urls=False, remove_urls=True, remove_user_mentions=False,
-                                    remove_hashtags=True,
+    print('========== e7_3: TOKEN-NGRAMS (1,3) WITHOUT LONG-TAIL BLIND URLS BEGIN ==========')
+    preproc_text = tp.TextProcessor(blind_urls=True, remove_urls=False, remove_user_mentions=False,
+                                    remove_hashtags=False,
                                     transform_lowercase=False, expand_urls=False)
     print('** preproc config:', preproc_text, '**')
 
@@ -459,6 +459,34 @@ def e7_3():
     cross_validation.cross_val_score(pipeline, raw_data_nlt_90, targets_nlt_90, cv=5, n_jobs=1, scoring=scorer)
     print('done.')
     print('========== e7_3: TOKEN-NGRAMS (1,3) WITHOUT LONG-TAIL NO HASHTAGS END ==========')
+
+
+def e7_4():
+    """
+            E5 - TOKEN N-GRAMS
+            Dataset without long tail
+        """
+    print('========== e7_4: TOKEN-NGRAMS (1,3) WITHOUT LONG-TAIL NO HASHTAGS BEGIN ==========')
+    preproc_text = tp.TextProcessor(blind_urls=False, remove_urls=False, remove_user_mentions=False,
+                                    remove_hashtags=True,
+                                    transform_lowercase=False, expand_urls=False)
+    print('** preproc config:', preproc_text, '**')
+
+    raw_data_nlt_90, targets_nlt_90 = dataset.getData(cut_long_tail=True)
+
+    """ Initialise PrintScorer for cross-validation"""
+    scorer = CrossValidation.PrintingScorer()
+
+    pipeline = Pipeline(
+        [('vect',
+          CountVectorizer(preprocessor=preproc_text, tokenizer=tok, lowercase=False, binary=True, analyzer='word',
+                          ngram_range=(1, 3))),
+         ('clf', MultinomialNB()),
+         ])
+    print('Cross Validation with 90% long-tail-cutoff...')
+    cross_validation.cross_val_score(pipeline, raw_data_nlt_90, targets_nlt_90, cv=5, n_jobs=1, scoring=scorer)
+    print('done.')
+    print('========== e7_4: TOKEN-NGRAMS (1,3) WITHOUT LONG-TAIL NO HASHTAGS END ==========')
 
 
 def e8():
@@ -497,10 +525,11 @@ def e8():
 # e4()
 # e5()
 # e5_1()
-e5_1_storePrediction()
+# e5_1_storePrediction()
 # e6()
 # e6_l()
 # e7_1()
 # e7_2()
-# e7_3()
+e7_3()
+e7_4()
 # e8()
