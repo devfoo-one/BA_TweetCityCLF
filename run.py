@@ -20,7 +20,7 @@ from Utils.validation import CrossValidation
 dataset_path = sys.argv[1]
 
 """ read from json """
-dataset = Dataset(dataset=dataset_path)
+# dataset = Dataset(dataset=dataset_path)
 
 """ Initialise default tokenizer """
 tok = Tokenize.TweetTokenizer()
@@ -489,12 +489,12 @@ def e7_4():
     print('========== e7_4: TOKEN-NGRAMS (1,3) WITHOUT LONG-TAIL NO HASHTAGS END ==========')
 
 
-def e8():
+def e8_1():
     """
         E8 - TOKEN-NGRAMS ON USER PROFILE LOCATION
         Dataset without long tail
     """
-    print('========== e8: TOKEN-NGRAMS (1,3) TOKEN-NGRAMS ON USER PROFILE LOCATION WITHOUT LONG-TAIL BEGIN ==========')
+    print('========== e8_1: TOKEN-NGRAMS (1,3) TOKEN-NGRAMS ON USER PROFILE LOCATION WITHOUT LONG-TAIL BEGIN ==========')
     # preproc_text = tp.TextProcessor(blind_urls=False, remove_urls=True, remove_user_mentions=False,
     #                                 remove_hashtags=True,
     #                                 transform_lowercase=False, expand_urls=False)
@@ -515,7 +515,7 @@ def e8():
     print('Cross Validation with 90% long-tail-cutoff...')
     cross_validation.cross_val_score(pipeline, raw_data_nlt_90, targets_nlt_90, cv=5, n_jobs=1, scoring=scorer)
     print('done.')
-    print('========== e8: TOKEN-NGRAMS (1,3) TOKEN-NGRAMS ON USER PROFILE LOCATION WITHOUT LONG-TAIL END ==========')
+    print('========== e8_1: TOKEN-NGRAMS (1,3) TOKEN-NGRAMS ON USER PROFILE LOCATION WITHOUT LONG-TAIL END ==========')
 
 
 def e8_2():
@@ -523,7 +523,7 @@ def e8_2():
         E8 - TOKEN-NGRAMS ON USER PROFILE LOCATION
         Dataset without long tail
     """
-    print('========== e8: TOKEN-NGRAMS (1,3) TOKEN-NGRAMS ON USER PROFILE LOCATION LTCUTOFF 0.5 BEGIN ==========')
+    print('========== e8_2: TOKEN-NGRAMS (1,3) TOKEN-NGRAMS ON USER PROFILE LOCATION LTCUTOFF 0.5 BEGIN ==========')
     preproc_meta = tm.MetaFeatureProcessor(extract_profile_location=True)
     print('** preproc config:', preproc_meta, '**')
 
@@ -545,10 +545,10 @@ def e8_2():
     print('--- CLASSIFICATION REPORT FOR LONG-TAIL-CUTOFF 50% CLASSES ---')
     predicted = cross_validation.cross_val_predict(pipeline, raw_data_nlt_50, targets_nlt_50, cv=5, n_jobs=5)
     labels = list(set(targets_nlt_50))  # take only labels that have support
-    target_names = [dataset.getTargetName(x) for x in labels]
+    target_names = [dataset_50percent.getTargetName(x) for x in labels]
     print(metrics.classification_report(targets_nlt_50, predicted, labels=labels,
                                         target_names=target_names, digits=4))
-    print('========== e8: TOKEN-NGRAMS (1,3) TOKEN-NGRAMS ON USER PROFILE LOCATION LTCUTOFF 0.5 END ==========')
+    print('========== e8_2: TOKEN-NGRAMS (1,3) TOKEN-NGRAMS ON USER PROFILE LOCATION LTCUTOFF 0.5 END ==========')
 
 
 """Run experiments"""
@@ -565,5 +565,5 @@ def e8_2():
 # e7_2()
 # e7_3()
 # e7_4()
-# e8()
+# e8_1()
 e8_2()
