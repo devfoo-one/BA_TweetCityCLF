@@ -62,7 +62,7 @@ size = [(x[1] / 31050.76) for x in data]
 
 plt.bar(index, size, color=c.qualitative[0])
 plt.gca().set_ylabel("Anteil in %")
-plt.gca().set_xlabel("Position")
+plt.gca().set_xlabel("Rangfolge (sortiert nach Häufigkeit)")
 plt.gca().set_ylim([0, 20])
 plt.axes().set_aspect(0.65, 'box')
 

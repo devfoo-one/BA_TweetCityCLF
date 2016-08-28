@@ -20,7 +20,7 @@ from Utils.validation import CrossValidation
 dataset_path = sys.argv[1]
 
 """ read from json """
-dataset = Dataset(dataset=dataset_path)
+# dataset = Dataset(dataset=dataset_path)
 
 """ Initialise default tokenizer """
 tok = Tokenize.TweetTokenizer()
@@ -517,6 +517,32 @@ def e8():
     print('done.')
     print('========== e8: TOKEN-NGRAMS (1,3) TOKEN-NGRAMS ON USER PROFILE LOCATION WITHOUT LONG-TAIL END ==========')
 
+def e8_2():
+    """
+        E8 - TOKEN-NGRAMS ON USER PROFILE LOCATION
+        Dataset without long tail
+    """
+    print('========== e8: TOKEN-NGRAMS (1,3) TOKEN-NGRAMS ON USER PROFILE LOCATION LTCUTOFF 0.5 BEGIN ==========')
+    preproc_meta = tm.MetaFeatureProcessor(extract_profile_location=True)
+    print('** preproc config:', preproc_meta, '**')
+
+    dataset_50percent = Dataset(dataset_path, long_tail_cutoff=0.5)
+    raw_data_nlt_50, targets_nlt_50 = dataset_50percent.getData(cut_long_tail=True)
+
+    """ Initialise PrintScorer for cross-validation"""
+    scorer = CrossValidation.PrintingScorer()
+
+    pipeline = Pipeline(
+        [('vect',
+          CountVectorizer(preprocessor=preproc_meta, tokenizer=tok, lowercase=False, binary=True, analyzer='word',
+                          ngram_range=(1, 3))),
+         ('clf', MultinomialNB()),
+         ])
+    print('Cross Validation with 50% long-tail-cutoff...')
+    cross_validation.cross_val_score(pipeline, raw_data_nlt_50, targets_nlt_50, cv=5, n_jobs=1, scoring=scorer)
+    print('done.')
+    print('========== e8: TOKEN-NGRAMS (1,3) TOKEN-NGRAMS ON USER PROFILE LOCATION LTCUTOFF 0.5 END ==========')
+
 
 """Run experiments"""
 # e1()
@@ -530,6 +556,7 @@ def e8():
 # e6_l()
 # e7_1()
 # e7_2()
-e7_3()
-e7_4()
+# e7_3()
+# e7_4()
 # e8()
+e8_2()
