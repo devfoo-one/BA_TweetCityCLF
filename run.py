@@ -20,7 +20,7 @@ from Utils.validation import CrossValidation
 dataset_path = sys.argv[1]
 
 """ read from json """
-# dataset = Dataset(dataset=dataset_path)
+dataset = Dataset(dataset=dataset_path)
 
 """ Initialise default tokenizer """
 tok = Tokenize.TweetTokenizer()
@@ -540,8 +540,14 @@ def e8_2():
          ('clf', MultinomialNB()),
          ])
     print('Cross Validation with 50% long-tail-cutoff...')
-    cross_validation.cross_val_score(pipeline, raw_data_nlt_50, targets_nlt_50, cv=5, n_jobs=1, scoring=scorer)
+    cross_validation.cross_val_score(pipeline, raw_data_nlt_50, targets_nlt_50, cv=5, n_jobs=5, scoring=scorer)
     print('done.')
+    print('--- CLASSIFICATION REPORT FOR LONG-TAIL-CUTOFF 50% CLASSES ---')
+    predicted = cross_validation.cross_val_predict(pipeline, raw_data_nlt_50, targets_nlt_50, cv=5, n_jobs=5)
+    labels = list(set(targets_nlt_50))  # take only labels that have support
+    target_names = [dataset.getTargetName(x) for x in labels]
+    print(metrics.classification_report(targets_nlt_50, predicted, labels=labels,
+                                        target_names=target_names, digits=4))
     print('========== e8: TOKEN-NGRAMS (1,3) TOKEN-NGRAMS ON USER PROFILE LOCATION LTCUTOFF 0.5 END ==========')
 
 
