@@ -44,11 +44,11 @@ def e1():
          ('clf', MultinomialNB()),
          ])
 
-    # print('Cross Validation all classes...')
-    # """ Initialise PrintScorer for cross-validation"""
-    # scorer = CrossValidation.PrintingScorer()
-    # cross_validation.cross_val_score(pipeline, raw_data, targets, cv=5, n_jobs=1, scoring=scorer)
-    # print('done.')
+    print('Cross Validation all classes...')
+    """ Initialise PrintScorer for cross-validation"""
+    scorer = CrossValidation.PrintingScorer()
+    cross_validation.cross_val_score(pipeline, raw_data, targets, cv=5, n_jobs=1, scoring=scorer)
+    print('done.')
 
     print('--- CLASSIFICATION REPORT FOR LAST 10% (LONG-TAIL) CLASSES ---')
     targets_nlt_90 = dataset.getData(cut_long_tail=True)[1]
