@@ -39,24 +39,24 @@ def e1():
                                     transform_lowercase=False, expand_urls=False)
     print('** preproc config:', preproc_text, '**')
 
-    """ Initialise PrintScorer for cross-validation"""
-    scorer = CrossValidation.PrintingScorer()
-
-    print('Cross Validation all classes...')
     pipeline = Pipeline(
         [('vect', CountVectorizer(preprocessor=preproc_text, tokenizer=tok, lowercase=False, binary=True)),
          ('clf', MultinomialNB()),
          ])
-    cross_validation.cross_val_score(pipeline, raw_data, targets, cv=5, n_jobs=1, scoring=scorer)
-    print('done.')
 
-    # print('--- CLASSIFICATION REPORT FOR LAST 10% (LONG-TAIL) CLASSES ---')
-    # targets_nlt_90 = dataset.getData(cut_long_tail=True)[1]
-    # labels_longtail = list(set(targets).difference(set(targets_nlt_90)))  # take only labels that have support
-    # target_names_longtail = [dataset.getTargetName(x) for x in labels_longtail]
-    # predicted = cross_validation.cross_val_predict(pipeline, raw_data, targets, cv=5, n_jobs=1)
-    # print(metrics.classification_report(targets, predicted, labels=labels_longtail,
-    #                                     target_names=target_names_longtail, digits=4))
+    # print('Cross Validation all classes...')
+    # """ Initialise PrintScorer for cross-validation"""
+    # scorer = CrossValidation.PrintingScorer()
+    # cross_validation.cross_val_score(pipeline, raw_data, targets, cv=5, n_jobs=1, scoring=scorer)
+    # print('done.')
+
+    print('--- CLASSIFICATION REPORT FOR LAST 10% (LONG-TAIL) CLASSES ---')
+    targets_nlt_90 = dataset.getData(cut_long_tail=True)[1]
+    labels_longtail = list(set(targets).difference(set(targets_nlt_90)))  # take only labels that have support
+    target_names_longtail = [dataset.getTargetName(x) for x in labels_longtail]
+    predicted = cross_validation.cross_val_predict(pipeline, raw_data, targets, cv=5, n_jobs=1)
+    print(metrics.classification_report(targets, predicted, labels=labels_longtail,
+                                        target_names=target_names_longtail, digits=4))
 
     print('========== e1: BINARY BOW END ==========')
 
@@ -460,7 +460,8 @@ def e8_1():
         E8 - TOKEN-NGRAMS ON USER PROFILE LOCATION
         Dataset without long tail
     """
-    print('========== e8_1: TOKEN-NGRAMS (1,3) TOKEN-NGRAMS ON USER PROFILE LOCATION WITHOUT LONG-TAIL BEGIN ==========')
+    print(
+        '========== e8_1: TOKEN-NGRAMS (1,3) TOKEN-NGRAMS ON USER PROFILE LOCATION WITHOUT LONG-TAIL BEGIN ==========')
     # preproc_text = tp.TextProcessor(blind_urls=False, remove_urls=True, remove_user_mentions=False,
     #                                 remove_hashtags=True,
     #                                 transform_lowercase=False, expand_urls=False)
