@@ -20,7 +20,7 @@ from Utils.validation import CrossValidation
 dataset_path = sys.argv[1]
 
 """ read from json """
-# dataset = Dataset(dataset=dataset_path)
+dataset = Dataset(dataset=dataset_path)
 
 """ Initialise default tokenizer """
 tok = Tokenize.TweetTokenizer()
@@ -33,64 +33,30 @@ def e1():
     Dataset with long tail
     """
     print('========== e1: BINARY BOW WITH LONG TAIL BEGIN ==========')
-    PERCENT_TRAIN = 0.7
-    PERCENT_TEST = 0.3
-    raw_train_data, train_targets = dataset.getData(n=len(dataset) * PERCENT_TRAIN,
-                                                    cut_long_tail=False)
-    raw_train_data_nlt, train_targets_nlt = dataset.getData(n=len(dataset) * PERCENT_TRAIN,
-                                                            cut_long_tail=True)
-    raw_test_data, test_targets = dataset.getData(offset=len(dataset) * PERCENT_TRAIN,
-                                                  n=len(dataset) * PERCENT_TEST,
-                                                  cut_long_tail=False)
-    raw_test_data_nlt, test_targets_nlt = dataset.getData(offset=len(dataset) * PERCENT_TRAIN,
-                                                          n=len(dataset) * PERCENT_TEST,
-                                                          cut_long_tail=True)
-    print('SAMPLES = {}, TRAIN = {} ({:.2%}), TEST = {} ({:.2%})'.format(len(dataset),
-                                                                         len(raw_train_data),
-                                                                         PERCENT_TRAIN,
-                                                                         len(raw_test_data),
-                                                                         PERCENT_TEST))
+    raw_data, targets = dataset.getData(cut_long_tail=False)
     preproc_text = tp.TextProcessor(blind_urls=False, remove_urls=False, remove_user_mentions=False,
                                     remove_hashtags=False,
                                     transform_lowercase=False, expand_urls=False)
     print('** preproc config:', preproc_text, '**')
-    print('Training classifier...', end='', flush=True)
+
+    """ Initialise PrintScorer for cross-validation"""
+    scorer = CrossValidation.PrintingScorer()
+
+    print('Cross Validation all classes...')
     pipeline = Pipeline(
         [('vect', CountVectorizer(preprocessor=preproc_text, tokenizer=tok, lowercase=False, binary=True)),
          ('clf', MultinomialNB()),
          ])
-    pipeline.fit(raw_train_data, train_targets)
-    print('done.')
-    print('Predicting test data...', end='', flush=True)
-    predicted = pipeline.predict(raw_test_data)
-
+    cross_validation.cross_val_score(pipeline, raw_data, targets, cv=5, n_jobs=1, scoring=scorer)
     print('done.')
 
-    precision_micro = precision_score(test_targets, predicted, average='micro')
-    precision_macro = precision_score(test_targets, predicted, average='macro')
-    precision_weighted = precision_score(test_targets, predicted, average='weighted')
-    recall_micro = recall_score(test_targets, predicted, average='micro')
-    recall_macro = recall_score(test_targets, predicted, average='macro')
-    recall_weighted = recall_score(test_targets, predicted, average='weighted')
-    f1_micro = f1_score(test_targets, predicted, average='micro')
-    f1_macro = f1_score(test_targets, predicted, average='macro')
-    f1_weighted = f1_score(test_targets, predicted, average='weighted')
-    accuracy = accuracy_score(test_targets, predicted)
-    print('--- PrintingScorer ---')
-    print("Precision:\tmicro={}\tmacro={}\tweighted={}".format(precision_micro, precision_macro, precision_weighted))
-    print("Recall:\t\tmicro={}\tmacro={}\tweighted={}".format(recall_micro, recall_macro, recall_weighted))
-    print("F-Measure:\tmicro={}\tmacro={}\tweighted={}".format(f1_micro, f1_macro, f1_weighted))
-    print("Accuracy:\t{}".format(accuracy))
-
-    print('--- FULL CLASSIFICATION REPORT WITH ALL CLASSES ---')
-    labels = list(set(test_targets))  # take only labels that have support
-    target_names = [dataset.getTargetName(x) for x in labels]
-    print(metrics.classification_report(test_targets, predicted, labels=labels, target_names=target_names, digits=4))
-    print('--- CLASSIFICATION REPORT FOR LONG-TAIL CLASSES ---')
-    labels_longtail = list(set(test_targets).difference(set(test_targets_nlt)))  # take only labels that have support
-    target_names_longtail = [dataset.getTargetName(x) for x in labels]
-    print(metrics.classification_report(test_targets, predicted, labels=labels_longtail,
-                                        target_names=target_names_longtail, digits=4))
+    # print('--- CLASSIFICATION REPORT FOR LAST 10% (LONG-TAIL) CLASSES ---')
+    # targets_nlt_90 = dataset.getData(cut_long_tail=True)[1]
+    # labels_longtail = list(set(targets).difference(set(targets_nlt_90)))  # take only labels that have support
+    # target_names_longtail = [dataset.getTargetName(x) for x in labels_longtail]
+    # predicted = cross_validation.cross_val_predict(pipeline, raw_data, targets, cv=5, n_jobs=1)
+    # print(metrics.classification_report(targets, predicted, labels=labels_longtail,
+    #                                     target_names=target_names_longtail, digits=4))
 
     print('========== e1: BINARY BOW END ==========')
 
@@ -552,7 +518,7 @@ def e8_2():
 
 
 """Run experiments"""
-# e1()
+e1()
 # e2()
 # e3()
 # e4()
@@ -566,4 +532,4 @@ def e8_2():
 # e7_3()
 # e7_4()
 # e8_1()
-e8_2()
+# e8_2()
