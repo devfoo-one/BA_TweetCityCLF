@@ -92,10 +92,12 @@ class TextProcessor:
 class MetaFeatureProcessor:
     config = {
         'extract_profile_location': False,
+        'extract_user_id': False
     }
 
-    def __init__(self, extract_profile_location=False):
+    def __init__(self, extract_profile_location=False, extract_user_id=False):
         self.config['extract_profile_location'] = extract_profile_location
+        self.config['extract_user_id'] = extract_user_id
 
     def digest(self, tweet):
         features = []
@@ -109,6 +111,10 @@ class MetaFeatureProcessor:
             if user_location is None or len(user_location) == 0:
                 user_location = ''
             features.append(user_location)
+
+        if self.config['extract_user_id']:
+            user_id = str(tweet['user']['id'])
+            features.append(user_id)
 
         return ' '.join(features)
 

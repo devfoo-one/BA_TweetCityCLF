@@ -52,6 +52,7 @@ def cleanTweetObj(tweet):
         'text': tweet['text'],
         'timestamp_ms': tweet['timestamp_ms'],
         'user': {
+            'id': tweet['user']['id'],
             'name': tweet['user']['name'],
             'location': tweet['user']['location']
         },

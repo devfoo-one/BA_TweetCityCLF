@@ -210,6 +210,35 @@ def e5_1():
     print('========== e5_1: TOKEN-NGRAMS (1,3) WITHOUT LONG-TAIL END ==========')
 
 
+def e5_1_multinomial():
+    """
+        E5_1 - TOKEN N-GRAMS MULTINOMIAL
+        Dataset without long tail
+    """
+    print('========== e5_1_multinomial: TOKEN-NGRAMS (1,3) WITHOUT LONG-TAIL BEGIN ==========')
+    preproc_text = tp.TextProcessor(blind_urls=False, remove_urls=False, remove_user_mentions=False,
+                                    remove_hashtags=False,
+                                    transform_lowercase=False, expand_urls=False)
+    print('** preproc config:', preproc_text, '**')
+
+    raw_data_nlt_90, targets_nlt_90 = dataset.getData(cut_long_tail=True)
+
+    """ Initialise PrintScorer for cross-validation"""
+    scorer = PrintingScorer.PrintingScorer()
+
+    pipeline = Pipeline(
+        [('vect',
+          CountVectorizer(preprocessor=preproc_text, tokenizer=tok, lowercase=False, binary=False, analyzer='word',
+                          ngram_range=(1, 3))),
+         ('clf', MultinomialNB()),
+         ])
+    print(pipeline)
+    print('Cross Validation with 90% long-tail-cutoff...', end='', flush=True)
+    cross_validation.cross_val_score(pipeline, raw_data_nlt_90, targets_nlt_90, cv=5, n_jobs=1, scoring=scorer)
+    print('done.')
+    print('========== e5_1_multinomial: TOKEN-NGRAMS (1,3) WITHOUT LONG-TAIL END ==========')
+
+
 def e5_2():
     """
         E5_2 - TOKEN N-GRAMS lowercase
@@ -514,20 +543,47 @@ def e8_2():
     print('========== e8_2: TOKEN-NGRAMS (1,3) TOKEN-NGRAMS ON USER PROFILE LOCATION LTCUTOFF 0.5 END ==========')
 
 
+def e9():
+    """
+        E9 - USER ID
+        Dataset without long tail
+    """
+    print(
+        '========== e9: USER_ID LTCUTOFF 0.9 BEGIN ==========')
+    preproc_meta = Preprocessing.MetaFeatureProcessor(extract_user_id=True)
+    print('** preproc config:', preproc_meta, '**')
+
+    raw_data_nlt_90, targets_nlt_90 = dataset.getData(cut_long_tail=True)
+
+    """ Initialise PrintScorer for cross-validation"""
+    scorer = PrintingScorer.PrintingScorer()
+
+    pipeline = Pipeline(
+        [('vect',
+          CountVectorizer(preprocessor=preproc_meta, tokenizer=tok, lowercase=False, binary=True, analyzer='word')),
+         ('clf', MultinomialNB()),
+         ])
+    print('Cross Validation with 90% long-tail-cutoff...')
+    cross_validation.cross_val_score(pipeline, raw_data_nlt_90, targets_nlt_90, cv=5, n_jobs=5, scoring=scorer)
+    print('done.')
+    print('========== e9: USER_ID LTCUTOFF 0.9 END ==========')
+
+
 """Run experiments"""
 # e1()
 # e2()
 # e3()
 # e4()
-# e5()
-# e5_1() # TODO BINARY
+# e5_1()
 # e5_1_storePrediction()
+e5_1_multinomial()
+# e5_2()
 # e6()
 # e6_l()
 # e7_1()
 # e7_2()
 # e7_3()
 # e7_4()
-e8_1()
-e8_2()
-# e8_3() # TODO USERID
+# e8_1()
+# e8_2()
+e9()
