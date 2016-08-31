@@ -6,7 +6,7 @@ from sklearn.pipeline import Pipeline
 
 from Dataset import Dataset
 from sklearn import cross_validation
-from Utils.preprocessing import preproc_text as tp
+from Utils.preprocessing import Preproc_Text as tp
 from Utils.tokenization import Tokenize
 from Utils.validation import CrossValidation
 

@@ -12,8 +12,8 @@ from sklearn.naive_bayes import MultinomialNB
 from sklearn.pipeline import Pipeline
 
 from Dataset import Dataset
-from Utils.preprocessing import preproc_text as tp
-from Utils.preprocessing import preproc_meta as tm
+from Utils.preprocessing import Preproc_Text as tp
+from Utils.preprocessing import Preproc_Meta as tm
 from Utils.tokenization import Tokenize
 from Utils.validation import CrossValidation
 
@@ -524,7 +524,7 @@ e1()
 # e3()
 # e4()
 # e5()
-# e5_1()
+# e5_1() # TODO BINARY
 # e5_1_storePrediction()
 # e6()
 # e6_l()
@@ -534,3 +534,4 @@ e1()
 # e7_4()
 # e8_1()
 # e8_2()
+# e8_3() # TODO USERID

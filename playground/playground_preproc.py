@@ -1,7 +1,7 @@
 import json
 
-from Utils.preprocessing.preproc_meta import MetaFeatureProcessor
-from Utils.preprocessing.preproc_text import TextProcessor
+from Utils.preprocessing.Preproc_Meta import MetaFeatureProcessor
+from Utils.preprocessing.Preproc_Text import TextProcessor
 
 # meta_preproc = MetaFeatureProcessor(extract_profile_location=True)
 # with open('../../data/Germany_filtered_shuffled.json') as dataset:
