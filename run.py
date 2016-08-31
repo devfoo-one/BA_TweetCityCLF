@@ -11,9 +11,9 @@ from sklearn.metrics import recall_score
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.pipeline import Pipeline
 
+import Utils.preprocessing.Preprocessing
 from Dataset import Dataset
-from Utils.preprocessing import Preproc_Text as tp
-from Utils.preprocessing import Preproc_Meta as tm
+from Utils.preprocessing import Preprocessing as tp
 from Utils.tokenization import Tokenize
 from Utils.validation import CrossValidation
 
@@ -465,7 +465,7 @@ def e8_1():
     # preproc_text = tp.TextProcessor(blind_urls=False, remove_urls=True, remove_user_mentions=False,
     #                                 remove_hashtags=True,
     #                                 transform_lowercase=False, expand_urls=False)
-    preproc_meta = tm.MetaFeatureProcessor(extract_profile_location=True)
+    preproc_meta = Utils.preprocessing.Preprocessing.MetaFeatureProcessor(extract_profile_location=True)
     print('** preproc config:', preproc_meta, '**')
 
     raw_data_nlt_90, targets_nlt_90 = dataset.getData(cut_long_tail=True)
@@ -491,7 +491,7 @@ def e8_2():
         Dataset without long tail
     """
     print('========== e8_2: TOKEN-NGRAMS (1,3) TOKEN-NGRAMS ON USER PROFILE LOCATION LTCUTOFF 0.5 BEGIN ==========')
-    preproc_meta = tm.MetaFeatureProcessor(extract_profile_location=True)
+    preproc_meta = Utils.preprocessing.Preprocessing.MetaFeatureProcessor(extract_profile_location=True)
     print('** preproc config:', preproc_meta, '**')
 
     dataset_50percent = Dataset(dataset_path, long_tail_cutoff=0.5)
