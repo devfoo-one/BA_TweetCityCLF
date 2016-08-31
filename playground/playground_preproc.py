@@ -1,6 +1,6 @@
 import json
 
-from Preprocessing import TextProcessor
+from Preprocessing import TextProcessor, MetaFeatureProcessor
 
 # meta_preproc = MetaFeatureProcessor(extract_profile_location=True)
 # with open('../../data/Germany_filtered_shuffled.json') as dataset:
@@ -12,6 +12,7 @@ from Preprocessing import TextProcessor
 #         print(meta_preproc.digest(tweet))
 
 text_preproc = TextProcessor(only_hashtags=True)
+meta_preproc = MetaFeatureProcessor(extract_profile_location=True)
 with open('../../data/Germany_filtered_shuffled.json') as dataset:
     for line in dataset:
         try:
@@ -19,3 +20,4 @@ with open('../../data/Germany_filtered_shuffled.json') as dataset:
         except ValueError:
             continue
         print(text_preproc.digest(tweet))
+        print(meta_preproc.digest(tweet))
