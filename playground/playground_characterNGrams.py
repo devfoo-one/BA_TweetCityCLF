@@ -1,8 +1,8 @@
 from sklearn.feature_extraction.text import CountVectorizer
 
-from Utils.tokenization import Tokenize
+import Tokenization
 
-tok = Tokenize.TweetTokenizer()
+tok = Tokenization.TweetTokenizer()
 cv = CountVectorizer(tokenizer=tok, lowercase=False, binary=True, analyzer='char', ngram_range=(1, 3))
 docs = ['AAA BBB']
 tdm = cv.fit_transform(docs)

@@ -1,8 +1,8 @@
 import json
 
-from Utils.tokenization import Tokenize
+import Tokenization
 
-tok = Tokenize.TweetTokenizer()
+tok = Tokenization.TweetTokenizer()
 
 with open('../../data/Germany_filtered_shuffled.json') as dataset:
     for line in dataset:

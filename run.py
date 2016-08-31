@@ -1,21 +1,17 @@
 import sys
 
+from sklearn import metrics, cross_validation
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn import metrics, cross_validation
 from sklearn.grid_search import GridSearchCV
-from sklearn.metrics import accuracy_score
-from sklearn.metrics import f1_score
-from sklearn.metrics import precision_score
-from sklearn.metrics import recall_score
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.pipeline import Pipeline
 
-import Utils.preprocessing.Preprocessing
+import Preprocessing
+import Preprocessing as tp
+import PrintingScorer
+import Tokenization
 from Dataset import Dataset
-from Utils.preprocessing import Preprocessing as tp
-from Utils.tokenization import Tokenize
-from Utils.validation import CrossValidation
 
 dataset_path = sys.argv[1]
 
@@ -23,7 +19,7 @@ dataset_path = sys.argv[1]
 dataset = Dataset(dataset=dataset_path)
 
 """ Initialise default tokenizer """
-tok = Tokenize.TweetTokenizer()
+tok = Tokenization.TweetTokenizer()
 
 
 def e1():
@@ -46,7 +42,7 @@ def e1():
 
     print('Cross Validation all classes...')
     """ Initialise PrintScorer for cross-validation"""
-    scorer = CrossValidation.PrintingScorer()
+    scorer = PrintingScorer.PrintingScorer()
     cross_validation.cross_val_score(pipeline, raw_data, targets, cv=5, n_jobs=1, scoring=scorer)
     print('done.')
 
@@ -78,7 +74,7 @@ def e2():
     raw_data_nlt_50, targets_nlt_50 = dataset_50percent.getData(cut_long_tail=True)
 
     """ Initialise PrintScorer for cross-validation"""
-    scorer = CrossValidation.PrintingScorer()
+    scorer = PrintingScorer.PrintingScorer()
 
     print('Cross Validation with 90% long-tail-cutoff...', end='', flush=True)
     pipeline = Pipeline(
@@ -143,7 +139,7 @@ def e3():
     print('-------------------------')
 
     """ Initialise PrintScorer for cross-validation"""
-    scorer = CrossValidation.PrintingScorer()
+    scorer = PrintingScorer.PrintingScorer()
 
     print('Cross Validation...', end='', flush=True)
     cross_validation.cross_val_score(gs_winner, raw_data_nlt_90, targets_nlt_90, cv=5, n_jobs=5, scoring=scorer)
@@ -166,7 +162,7 @@ def e4():
     raw_data_nlt_90, targets_nlt_90 = dataset.getData(cut_long_tail=True)
 
     """ Initialise PrintScorer for cross-validation"""
-    scorer = CrossValidation.PrintingScorer()
+    scorer = PrintingScorer.PrintingScorer()
 
     print('Cross Validation with 90% long-tail-cutoff...', end='', flush=True)
     pipeline = Pipeline(
@@ -199,7 +195,7 @@ def e5_1():
     raw_data_nlt_90, targets_nlt_90 = dataset.getData(cut_long_tail=True)
 
     """ Initialise PrintScorer for cross-validation"""
-    scorer = CrossValidation.PrintingScorer()
+    scorer = PrintingScorer.PrintingScorer()
 
     pipeline = Pipeline(
         [('vect',
@@ -228,7 +224,7 @@ def e5_2():
     raw_data_nlt_90, targets_nlt_90 = dataset.getData(cut_long_tail=True)
 
     """ Initialise PrintScorer for cross-validation"""
-    scorer = CrossValidation.PrintingScorer()
+    scorer = PrintingScorer.PrintingScorer()
 
     pipeline = Pipeline(
         [('vect',
@@ -297,7 +293,7 @@ def e6():
     raw_data_nlt_90, targets_nlt_90 = dataset.getData(cut_long_tail=True)
 
     """ Initialise PrintScorer for cross-validation"""
-    scorer = CrossValidation.PrintingScorer()
+    scorer = PrintingScorer.PrintingScorer()
 
     pipeline = Pipeline(
         [('vect',
@@ -327,7 +323,7 @@ def e6_l():
     raw_data_nlt_90, targets_nlt_90 = dataset.getData(cut_long_tail=True)
 
     """ Initialise PrintScorer for cross-validation"""
-    scorer = CrossValidation.PrintingScorer()
+    scorer = PrintingScorer.PrintingScorer()
 
     pipeline = Pipeline(
         [('vect',
@@ -357,7 +353,7 @@ def e7_1():
     raw_data_nlt_90, targets_nlt_90 = dataset.getData(cut_long_tail=True)
 
     """ Initialise PrintScorer for cross-validation"""
-    scorer = CrossValidation.PrintingScorer()
+    scorer = PrintingScorer.PrintingScorer()
 
     pipeline = Pipeline(
         [('vect',
@@ -385,7 +381,7 @@ def e7_2():
     raw_data_nlt_90, targets_nlt_90 = dataset.getData(cut_long_tail=True)
 
     """ Initialise PrintScorer for cross-validation"""
-    scorer = CrossValidation.PrintingScorer()
+    scorer = PrintingScorer.PrintingScorer()
 
     pipeline = Pipeline(
         [('vect',
@@ -413,7 +409,7 @@ def e7_3():
     raw_data_nlt_90, targets_nlt_90 = dataset.getData(cut_long_tail=True)
 
     """ Initialise PrintScorer for cross-validation"""
-    scorer = CrossValidation.PrintingScorer()
+    scorer = PrintingScorer.PrintingScorer()
 
     pipeline = Pipeline(
         [('vect',
@@ -441,7 +437,7 @@ def e7_4():
     raw_data_nlt_90, targets_nlt_90 = dataset.getData(cut_long_tail=True)
 
     """ Initialise PrintScorer for cross-validation"""
-    scorer = CrossValidation.PrintingScorer()
+    scorer = PrintingScorer.PrintingScorer()
 
     pipeline = Pipeline(
         [('vect',
@@ -465,13 +461,13 @@ def e8_1():
     # preproc_text = tp.TextProcessor(blind_urls=False, remove_urls=True, remove_user_mentions=False,
     #                                 remove_hashtags=True,
     #                                 transform_lowercase=False, expand_urls=False)
-    preproc_meta = Utils.preprocessing.Preprocessing.MetaFeatureProcessor(extract_profile_location=True)
+    preproc_meta = Preprocessing.MetaFeatureProcessor(extract_profile_location=True)
     print('** preproc config:', preproc_meta, '**')
 
     raw_data_nlt_90, targets_nlt_90 = dataset.getData(cut_long_tail=True)
 
     """ Initialise PrintScorer for cross-validation"""
-    scorer = CrossValidation.PrintingScorer()
+    scorer = PrintingScorer.PrintingScorer()
 
     pipeline = Pipeline(
         [('vect',
@@ -491,14 +487,14 @@ def e8_2():
         Dataset without long tail
     """
     print('========== e8_2: TOKEN-NGRAMS (1,3) TOKEN-NGRAMS ON USER PROFILE LOCATION LTCUTOFF 0.5 BEGIN ==========')
-    preproc_meta = Utils.preprocessing.Preprocessing.MetaFeatureProcessor(extract_profile_location=True)
+    preproc_meta = Preprocessing.MetaFeatureProcessor(extract_profile_location=True)
     print('** preproc config:', preproc_meta, '**')
 
     dataset_50percent = Dataset(dataset_path, long_tail_cutoff=0.5)
     raw_data_nlt_50, targets_nlt_50 = dataset_50percent.getData(cut_long_tail=True)
 
     """ Initialise PrintScorer for cross-validation"""
-    scorer = CrossValidation.PrintingScorer()
+    scorer = PrintingScorer.PrintingScorer()
 
     pipeline = Pipeline(
         [('vect',

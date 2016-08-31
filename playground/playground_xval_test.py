@@ -1,18 +1,18 @@
 import sys
 
+from sklearn import cross_validation
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.pipeline import Pipeline
 
+import Preprocessing as tp
+import PrintingScorer
+import Tokenization
 from Dataset import Dataset
-from sklearn import cross_validation
-from Utils.preprocessing import Preprocessing as tp
-from Utils.tokenization import Tokenize
-from Utils.validation import CrossValidation
 
 dataset = Dataset(dataset=sys.argv[1])
 raw_train_data, train_targets = dataset.getData(cut_long_tail=True)
-tok = Tokenize.TweetTokenizer()
+tok = Tokenization.TweetTokenizer()
 preproc_text = tp.TextProcessor(blind_urls=False, remove_urls=False, remove_user_mentions=False,
                                 remove_hashtags=False,
                                 transform_lowercase=False, expand_urls=False)
@@ -23,5 +23,5 @@ pipeline = Pipeline(
      ('clf', MultinomialNB()),
      ])
 print('--- 5-FOLD CV, WEIGHTED F1 ---')
-scorer = CrossValidation.PrintingScorer()
+scorer = PrintingScorer.PrintingScorer()
 cross_validation.cross_val_score(pipeline, raw_train_data, train_targets, cv=5, n_jobs=5, scoring=scorer)
