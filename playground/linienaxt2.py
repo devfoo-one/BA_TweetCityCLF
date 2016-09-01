@@ -1,8 +1,8 @@
 import numpy as np
 
 # row_pattern = r'{} & {} & {} & {} & {} & {} & {}    \\ \hline'
-row_pattern = r'\textbf{{{}}} & {:1.3f} & \(\pm\) {:1.4f} & {:1.3f} & \(\pm\) {:1.4f} \\'
-row_pattern_accuracy = r'\textbf{{Accuracy}} & {:1.3f} & \(\pm\) {:1.4f} & \\'
+row_pattern = r'\textbf{{{}}} & {:1.3f} \(\pm\) {:1.4f} & {:1.3f} \(\pm\) {:1.4f} \\'
+row_pattern_accuracy = r'\textbf{{Accuracy}} & \multicolumn{{2}}{{c}}{{{:1.3f} \(\pm\) {:1.4f}}} \\'
 
 lines = [
 'Precision:      micro=0.28424341265006975       macro=0.03905690479533423       weighted=0.5139105005277206',
@@ -57,5 +57,5 @@ for k in ['Precision','Recall', 'F-Measure', 'Accuracy']:
     weighted_mean = np.mean(v['weighted'])
     weighted_std = np.std(v['weighted'])
     if k == 'F-Measure':
-        k = 'F-Maß'
+        k = 'F1-Maß'
     print(row_pattern.format(k, macro_mean, macro_std, weighted_mean, weighted_std))
