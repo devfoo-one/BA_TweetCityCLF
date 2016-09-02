@@ -16,7 +16,7 @@ from Dataset import Dataset
 dataset_path = sys.argv[1]
 
 """ read from json """
-# dataset = Dataset(dataset=dataset_path) # TODO UNCOMMENT ME
+dataset = Dataset(dataset=dataset_path)
 
 """ Initialise default tokenizer """
 tok = Tokenization.TweetTokenizer()
@@ -192,7 +192,7 @@ def e5_1():
                                     transform_lowercase=False, expand_urls=False)
     print('** preproc config:', preproc_text, '**')
 
-    # raw_data_nlt_90, targets_nlt_90 = dataset.getData(cut_long_tail=True) #TODO UNCOMMENT ME
+    raw_data_nlt_90, targets_nlt_90 = dataset.getData(cut_long_tail=True)
 
     dataset_50percent = Dataset(dataset_path, long_tail_cutoff=0.5)
     raw_data_nlt_50, targets_nlt_50 = dataset_50percent.getData(cut_long_tail=True)
@@ -207,8 +207,8 @@ def e5_1():
          ('clf', MultinomialNB()),
          ])
     print(pipeline)
-    # print('Cross Validation with 90% long-tail-cutoff...', end='', flush=True)
-    # cross_validation.cross_val_score(pipeline, raw_data_nlt_90, targets_nlt_90, cv=5, n_jobs=1, scoring=scorer)
+    print('Cross Validation with 90% long-tail-cutoff...', end='', flush=True)
+    cross_validation.cross_val_score(pipeline, raw_data_nlt_90, targets_nlt_90, cv=5, n_jobs=1, scoring=scorer)
     print('Cross Validation with 50% long-tail-cutoff...', end='', flush=True)
     cross_validation.cross_val_score(pipeline, raw_data_nlt_50, targets_nlt_50, cv=5, n_jobs=1, scoring=scorer)
     print('done.')
