@@ -16,7 +16,7 @@ from Dataset import Dataset
 dataset_path = sys.argv[1]
 
 """ read from json """
-dataset = Dataset(dataset=dataset_path)
+# dataset = Dataset(dataset=dataset_path) # TODO UNCOMMENT ME
 
 """ Initialise default tokenizer """
 tok = Tokenization.TweetTokenizer()
@@ -192,7 +192,10 @@ def e5_1():
                                     transform_lowercase=False, expand_urls=False)
     print('** preproc config:', preproc_text, '**')
 
-    raw_data_nlt_90, targets_nlt_90 = dataset.getData(cut_long_tail=True)
+    # raw_data_nlt_90, targets_nlt_90 = dataset.getData(cut_long_tail=True) #TODO UNCOMMENT ME
+
+    dataset_50percent = Dataset(dataset_path, long_tail_cutoff=0.5)
+    raw_data_nlt_50, targets_nlt_50 = dataset_50percent.getData(cut_long_tail=True)
 
     """ Initialise PrintScorer for cross-validation"""
     scorer = PrintingScorer.PrintingScorer()
@@ -204,8 +207,10 @@ def e5_1():
          ('clf', MultinomialNB()),
          ])
     print(pipeline)
-    print('Cross Validation with 90% long-tail-cutoff...', end='', flush=True)
-    cross_validation.cross_val_score(pipeline, raw_data_nlt_90, targets_nlt_90, cv=5, n_jobs=1, scoring=scorer)
+    # print('Cross Validation with 90% long-tail-cutoff...', end='', flush=True)
+    # cross_validation.cross_val_score(pipeline, raw_data_nlt_90, targets_nlt_90, cv=5, n_jobs=1, scoring=scorer)
+    print('Cross Validation with 50% long-tail-cutoff...', end='', flush=True)
+    cross_validation.cross_val_score(pipeline, raw_data_nlt_50, targets_nlt_50, cv=5, n_jobs=1, scoring=scorer)
     print('done.')
     print('========== e5_1: TOKEN-NGRAMS (1,3) WITHOUT LONG-TAIL END ==========')
 
@@ -543,7 +548,7 @@ def e8_2():
     print('========== e8_2: TOKEN-NGRAMS (1,3) TOKEN-NGRAMS ON USER PROFILE LOCATION LTCUTOFF 0.5 END ==========')
 
 
-def e9():
+def e9():  # TODO REMOVE ME IN EXPORT VERSION
     """
         E9 - USER ID
         Dataset without long tail
@@ -574,9 +579,9 @@ def e9():
 # e2()
 # e3()
 # e4()
-# e5_1()
+e5_1()
 # e5_1_storePrediction()
-e5_1_multinomial()
+# e5_1_multinomial()
 # e5_2()
 # e6()
 # e6_l()
@@ -586,4 +591,4 @@ e5_1_multinomial()
 # e7_4()
 # e8_1()
 # e8_2()
-e9()
+# e9()
