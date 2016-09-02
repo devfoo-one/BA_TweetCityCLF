@@ -4,6 +4,22 @@ from Dataset import Dataset
 dataset_path = sys.argv[1]
 dataset = Dataset(dataset=dataset_path)
 
+targets_full = dataset.getData(cut_long_tail=False)[1]
+data, targets_other = dataset.getData(cut_long_tail=True)
+
+other = 0
+for x in targets_other:
+    if x == 'other':
+        other += 1
+
+
+print('dataset: {}, full-classes: {}, cut-off-classes (including +other): {}, others: {}'.format(
+    len(dataset),
+    len(set(targets_full)),
+    len(set(targets_other)),
+    other
+))
+
 # data, targets = dataset.getData(cut_long_tail=False)
 # data_NLT, targets_NLT = dataset.getData(cut_long_tail=True)
 # names_list = dataset.__target_names_list__
