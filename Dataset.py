@@ -1,5 +1,7 @@
 """
-Reads the Germany.json dataset and filters for "lang"=="de" and "place.type" == "city"
+Reads the Germany.json dataset
+It filters for "lang"=="de" and "place.type" == "city" "place.country_code" == "DE"
+It provides data in arrays for scikit-learn usage
 """
 
 import json
@@ -98,9 +100,10 @@ class Dataset:
                 continue  # Tweet has no lang or place.placetype. skipping.
         print('done.')
 
-        print("DATASET: Generating 'other' classes after top {:.2%}  target classes (long tail)... ".format(long_tail_cutoff), end='', flush=True)
         """Cut after N% of targets and point to class 'other', long_tail_cutoff percentage is given in constructor"""
 
+        print("DATASET: Generating 'other' classes after top {:.2%}  target classes (long tail)... ".format(
+            long_tail_cutoff), end='', flush=True)
         self.__targets_noLongTail__ = list(self.__targets__)
         self.__target_counter_noLongTail__ = dict(self.__target_counter__)
         self.__target_names_dict_noLongTail__ = dict(self.__target_names_dict__)
@@ -143,8 +146,7 @@ class Dataset:
         :return: str, most frequent name for this target id
         """
         if target_id == 'other':  # if someone asks for 'other' then use this dict
-            return \
-                sorted(self.__target_names_dict_noLongTail__[target_id].items(), key=lambda x: x[1], reverse=True)[0][0]
+            return sorted(self.__target_names_dict_noLongTail__[target_id].items(), key=lambda x: x[1], reverse=True)[0][0]
         else:  # superset of noLongTail dict,  so no problems with general inquiries
             return sorted(self.__target_names_dict__[target_id].items(), key=lambda x: x[1], reverse=True)[0][0]
 

@@ -1,8 +1,14 @@
-import re, html.parser
+import html.parser
+import re
 
 
 class TweetTokenizer:
     def __call__(self, t):
+        """
+        Tokenizes a string, but keeps urls intact.
+        :param t: String
+        :return: List
+        """
         t = str(t)
         t = html.parser.HTMLParser().unescape(t)
         links_re = re.compile('http[s]?://\S+')

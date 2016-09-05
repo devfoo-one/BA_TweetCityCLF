@@ -10,6 +10,16 @@ class TextProcessor:
 
     def __init__(self, blind_urls=False, remove_urls=False, remove_user_mentions=False, remove_hashtags=False,
                  transform_lowercase=True, expand_urls=True, only_hashtags=False):
+        """
+        Initialises a TextPreprocessor with given configuration
+        :param blind_urls: replace urls with [URL] or [MEDIA]
+        :param remove_urls: remove urls
+        :param remove_user_mentions: remove user mentions
+        :param remove_hashtags: remove hashtags
+        :param transform_lowercase: transform everything to lowercase
+        :param expand_urls: transform twitter short urls to real urls
+        :param only_hashtags: return only hashtags
+        """
         self.config['remove_urls'] = remove_urls
         self.config['remove_user_mentions'] = remove_user_mentions
         self.config['transform_lowercase'] = transform_lowercase
@@ -19,7 +29,12 @@ class TextProcessor:
         self.config['expand_urls'] = expand_urls
 
     def digest(self, tweet):
-        """Processes a tweet object (as given from the streaming api) and returns a string."""
+        """
+        Processes a Tweet object (as given from the streaming api) and returns a string.
+        Processing is done according to initial configuration.
+        :param tweet: Tweet, as given from the streaming api
+        :return: processed tweet as String
+        """
         tweet_text = tweet['text']
 
         """only hashtags"""
@@ -83,6 +98,11 @@ class TextProcessor:
         return tweet_text
 
     def __call__(self, tweet):
+        """
+        Calls digest(tweet)
+        :param tweet: Tweet, as given from the streaming api
+        :return: String
+        """
         return self.digest(tweet)
 
     def __str__(self):
@@ -96,10 +116,21 @@ class MetaFeatureProcessor:
     }
 
     def __init__(self, extract_profile_location=False, extract_user_id=False):
+        """
+        Initialises a TextPreprocessor with given configuration
+        :param extract_profile_location: extract profile location field (user object)
+        :param extract_user_id: extract id of user object
+        """
         self.config['extract_profile_location'] = extract_profile_location
         self.config['extract_user_id'] = extract_user_id
 
     def digest(self, tweet):
+        """
+        Processes a Tweet object (as given from the streaming api) and returns a string.
+        Processing is done according to initial configuration.
+        :param tweet: Tweet, as given from the streaming api
+        :return: processed tweet as String
+        """
         features = []
 
         """extract user location"""
@@ -119,6 +150,11 @@ class MetaFeatureProcessor:
         return ' '.join(features)
 
     def __call__(self, tweet):
+        """
+       Calls digest(tweet)
+       :param tweet: Tweet, as given from the streaming api
+       :return: String
+       """
         return self.digest(tweet)
 
     def __str__(self):

@@ -4,8 +4,6 @@ from sklearn.metrics import precision_score
 from sklearn.metrics import recall_score
 
 
-# http://stackoverflow.com/questions/35876508/evaluate-multiple-scores-on-sklearn-cross-val-score
-
 class PrintingScorer:
     """
     A scorer for scikit-learn cross validation needs to be an instance of a class since scikit is internally pickling stuff.

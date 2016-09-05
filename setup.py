@@ -2,12 +2,11 @@ from setuptools import setup
 
 setup(
     name='TweetCityCLF',
-    version='0.1',
+    version='1.0',
     packages=[''],
-    url='https://github.com/devfoo-one/TweetCityCLF',
     license='',
     author='Tom Oberhauser',
     author_email='tom@devfoo.de',
     description='Codebase for my bachelor thesis',
-    requires=['sklearn', 'geojson', 'numpy', 'scipy', 'matplotlib']
+    requires=['sklearn', 'scipy']
 )
